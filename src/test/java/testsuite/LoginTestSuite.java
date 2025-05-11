@@ -2,104 +2,145 @@ package testsuite;
 
 
 import org.testng.Assert;
+import org.testng.ITestResult;
 import org.testng.annotations.*;
 
+import java.lang.reflect.Array;
+import java.util.Arrays;
+
 public class LoginTestSuite {
-    private String token;
-    @BeforeClass
-    public void beforeClass() {
-        // Call login request to get token
-        this.token = "abc";
+    @BeforeGroups(groups = {"valid_user"})
+    public void beforeGroupValidUser() {
+        System.out.println("before group valid_user");
+//        Create an user
     }
 
-    @DataProvider (name = "token")
-    public Object[][] getToken() {
-        return new Object [][] {new String[]{token}};
-    }
-
-    @AfterClass
-    public void afterClass() {
-
-    }
-
-    @BeforeSuite
-    public void beforeSuite() {
-        // Connect google drive
-        // find suite same
-        // Copy to a new file
-
-    }
-
-    @AfterSuite
-    public void afterSuite() {
-        // Mark pass false on file
-
-    }
-
-    @BeforeTest
-    public void beforeTest() {
-
-    }
-
-    @AfterTest
-    public void afterTest() {
+    @AfterGroups(groups = {"valid_user"})
+    public void afterGroupValidUser() {
+        System.out.println("after group valid user");
+//        Delete an user
 
     }
 
     @BeforeGroups(groups = {"locked_user"})
     public void beforeGroupLockedUser() {
-        System.out.println("BeforeGroup------------------Setup a locked user");
+        System.out.println("Before group locked user");
+//    Create an user --> Lock the user
     }
 
     @AfterGroups(groups = {"locked_user"})
     public void afterGroupLockedUser() {
-        System.out.println("AfterGroup------------------Tear down a locked user");
+        System.out.println("After group lockd user");
+//    Delete the user
     }
 
-    @BeforeGroups(groups = {"valid_user"})
-    public void beforeGroupValidUser() {
-        System.out.println("BeforeGroup------------------Setup a valid user");
+    @BeforeGroups(groups = {"from_singup_page"})
+    public void beforeGroupFromSingUpPage() {
+        System.out.println("Before group from singup page");
+//        Create an user
+//        Go to Sign up page --> Go to Signin Page
     }
 
-    @AfterGroups(groups = {"valid_user"})
-    public void afterGroupValidUser() {
-        System.out.println("AfterGroup------------------Tear down a valid user");
+    @AfterGroups(groups = {"from_singup_page"})
+    public void afterGroupFromSingUpPage() {
+        System.out.println("after group signup page");
+//    Delete the user
+    }
+
+    @BeforeGroups(groups = {"from_detaied_article"})
+    public void beforeGroupFromDetailedArticle() {
+        System.out.println("Before group from detailed article");
+//        Create an user
+//        Go detailed article --> Signin page
+    }
+
+    @AfterGroups(groups = {"from_detaied_article"})
+    public void afterGroupFromDetailedArticle() {
+        System.out.println("After group from detailed article");
+//        Create an user
+//        Go detailed article --> Signin page
     }
 
     @BeforeMethod
-    public void beforeMethod() {
-        System.out.println("BeforeMethod------------------Setup env: Start web browser");
+    public void beforeMethod(ITestResult result) {
+        String groupName[] = result.getMethod().getGroups();
+        if (Arrays.asList(groupName).contains("from_singup_page") || Arrays.asList(groupName).contains("from_detaied_article")) {
+            return;
+        } else {
+            System.out.println("this is group" + Arrays.asList(groupName));
+//            Create an user
+//            Go to sigin in page
+        }
     }
 
     @AfterMethod
-    public void afterMethod() {
-        System.out.println("AfterMethod------------------Tear down env: Stop web browser");
+    public void afterMethod(ITestResult result) {
+        String groupName[] = result.getMethod().getGroups();
+        if (Arrays.asList(groupName).contains("from_singup_page") || Arrays.asList(groupName).contains("from_detaied_article")) {
+            System.out.println("this is group" + Arrays.asList(groupName));
+        } else {
+            System.out.println("After method");
+//        Delete the account
+        }
     }
 
-    @Test(description = """
-            User can login to the system using valid credential
-            """, groups = "valid_user")
-    public void Test_Case_Login_Success() {
-        System.out.println("This is test case login success");
-        // TODO: Open web url
-        // Enter valid user name, password
-        // Click login button
-        // Verify homepage and username after login success
+    @Test(description = "Login success", groups = {"valid_user"})
+    public void TC1_Login_Success() {
+        System.out.println("TC1");
+        Assert.assertTrue(true);
     }
 
-    @Test(description = """
-            User will login fail when enter wrong user name or password
-            """, groups = "valid_user")
-    public void Test_case_login_failed_wrong_username_password() {
-        System.out.println("This is test case login failed");
-        Assert.assertTrue(false);
-        System.out.println("This won't print out because of the test case is failed");
+    @Test(description = "Login Fail_Wrong Email", groups = {"valid_user"})
+    public void TC2_Login_Fail_WrongEmail() {
+        System.out.println("TC2");
+        Assert.assertTrue(true);
     }
 
-    @Test(description = """
-            Locked user cannot login to the system. He will see message 'User is locked'
-            """, groups = "locked_user")
-    public void Test_case_login_failed_with_locked_user() {
-        System.out.println("Test case to test locked user");
+    @Test(description = "Login Fail_Wrong Paasword", groups = {"valid_user"})
+    public void TC3_Login_Fail_WrongPassword() {
+        System.out.println("TC3");
+        Assert.assertTrue(true);
+    }
+
+    @Test(description = "Login_Fail_Wrong Email and Password", groups = {"valid_user"})
+    public void TC4_Login_Fail_WrongEmailAndPassword() {
+        System.out.println("TC4");
+        Assert.assertTrue(true);
+    }
+
+    @Test(description = "Login Fail_Empty Password", groups = {"valid user"})
+    public void TC5_Login_Fail_EmptyPassword() {
+        System.out.println("TC5");
+        Assert.assertTrue(true);
+    }
+
+    @Test(description = "Login Fail_Empty Email", groups = {"valid_user"})
+    public void TC6_Login_Fail_EmptyEmail() {
+        System.out.println("TC6");
+        Assert.assertTrue(true);
+    }
+
+    @Test(description = "Login Fail_Empty Email and Password", groups = {"valid_user"})
+    public void TC7_Login_Fail_EmptyEmailAndPassword() {
+        System.out.println("TC7");
+        Assert.assertTrue(true);
+    }
+
+    @Test(description = "Login Fail_No Existing User")
+    public void TC8_Login_Fail_NoExistingUser() {
+        System.out.println("TC8");
+        Assert.assertTrue(true);
+    }
+
+    @Test(description = "Login Success From SignUpScreen", groups = {"from_singup_page"})
+    public void TC9_Login_SuccessFromSignUpScreen() {
+        System.out.println("TC9");
+        Assert.assertTrue(true);
+    }
+
+    @Test(description = "Login Success From Detaeied Article", groups = {"from_detaied_article"})
+    public void TC10_Login_SuccessFromDetailedArticlePage() {
+        System.out.println("TC10");
+        Assert.assertTrue(true);
     }
 }
