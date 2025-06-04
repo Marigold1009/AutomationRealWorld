@@ -1,4 +1,4 @@
-package testsuite;
+package testsuite.ui.signup;
 
 import org.testng.Assert;
 import org.testng.ITestResult;
@@ -114,15 +114,8 @@ public class SignUpTestSuite {
         Assert.assertTrue(true);
     }
 
-    @Test(description = "Sign up Success from Login Page", groups = {"from_login_page"})
-    public void TC9_SignUp_Success_FromLoginPage() {
-        System.out.println("TC9");
-        Assert.assertTrue(true);
-    }
-
-    @Test(description = "Sign up Success from Detailed Article", groups = {"from_detailed_article_page"})
-    public void TC10_SignUp_Success_FromDetailArticle() {
-        System.out.println("TC10");
-        Assert.assertTrue(true);
+    @Test(description = "Redirect to Signin page")
+    public void TC9_GotoSigninPage(){
+//        Click have an account
     }
 }

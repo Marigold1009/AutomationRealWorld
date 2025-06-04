@@ -1,14 +1,17 @@
-package testsuite;
+package testsuite.ui.signin;
 
 
 import org.testng.Assert;
 import org.testng.ITestResult;
 import org.testng.annotations.*;
+import testsuite.base.BaseTest;
+import testsuite.ui.steps.LoginSteps;
+import testsuite.utils.ConfigLoader;
 
-import java.lang.reflect.Array;
 import java.util.Arrays;
 
-public class LoginTestSuite {
+public class LoginTestSuite extends BaseTest {
+
     @BeforeGroups(groups = {"valid_user"})
     public void beforeGroupValidUser() {
         System.out.println("before group valid_user");
@@ -19,7 +22,6 @@ public class LoginTestSuite {
     public void afterGroupValidUser() {
         System.out.println("after group valid user");
 //        Delete an user
-
     }
 
     @BeforeGroups(groups = {"locked_user"})
@@ -69,7 +71,7 @@ public class LoginTestSuite {
         } else {
             System.out.println("this is group" + Arrays.asList(groupName));
 //            Create an user
-//            Go to sigin in page
+//            Go to sign in page
         }
     }
 
@@ -86,7 +88,8 @@ public class LoginTestSuite {
 
     @Test(description = "Login success", groups = {"valid_user"})
     public void TC1_Login_Success() {
-        System.out.println("TC1");
+        LoginSteps loginSteps = new LoginSteps(driver);
+        loginSteps.loginWith(ConfigLoader.getValue("test.email"),ConfigLoader.getValue("test.password"));
         Assert.assertTrue(true);
     }
 
@@ -132,15 +135,8 @@ public class LoginTestSuite {
         Assert.assertTrue(true);
     }
 
-    @Test(description = "Login Success From SignUpScreen", groups = {"from_singup_page"})
-    public void TC9_Login_SuccessFromSignUpScreen() {
-        System.out.println("TC9");
-        Assert.assertTrue(true);
-    }
-
-    @Test(description = "Login Success From Detaeied Article", groups = {"from_detaied_article"})
-    public void TC10_Login_SuccessFromDetailedArticlePage() {
-        System.out.println("TC10");
-        Assert.assertTrue(true);
+    @Test(description = "Redirect to Signup page")
+    public void TC11_GotoSignupPage(){
+//        Click Need an account button
     }
 }

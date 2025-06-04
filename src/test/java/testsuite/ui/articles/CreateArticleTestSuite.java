@@ -1,4 +1,4 @@
-package testsuite;
+package testsuite.ui.articles;
 
 import org.testng.ITestResult;
 import org.testng.annotations.*;
@@ -33,7 +33,7 @@ public class CreateArticleTestSuite {
     @AfterMethod
     public void afterMethod(ITestResult result) {
         String groupName[] = result.getMethod().getGroups();
-        if(Arrays.asList(groupName).contains("existing_daya")){
+        if(Arrays.asList(groupName).contains("existing_data")){
 
         }else {
 //            Delete the article

@@ -1,9 +1,6 @@
-package testsuite;
+package testsuite.ui.articles;
 
-import org.testng.ITestResult;
 import org.testng.annotations.*;
-
-import java.util.Arrays;
 
 public class UpdateArticlesTestSuite {
 

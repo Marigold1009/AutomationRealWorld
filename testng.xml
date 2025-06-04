@@ -3,7 +3,7 @@
 <suite name="Suite1" verbose="1" >
     <test name="Test Login Success" >
         <classes>
-            <class name="testsuite.LoginTestSuite" >
+            <class name="ui.LoginTestSuite" >
                 <methods>
                     <include name="Test_Case_Login_Success"/>
                 </methods>

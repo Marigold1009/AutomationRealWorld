@@ -1,12 +1,11 @@
-package testsuite;
+package testsuite.ui.profiles;
 
-import org.testng.IResultMap;
 import org.testng.ITestResult;
 import org.testng.annotations.*;
 
 import java.util.Arrays;
 
-public class UpdateAccTestSuite {
+public class SettingPageTestSuite {
     @BeforeGroups({"existing_data"})
     public void beforeGroupExistingData() {
 //        Create an account01
@@ -88,8 +87,8 @@ public class UpdateAccTestSuite {
 
     }
 
-    @Test(description = "Update_Sucess_From_Acc_Page", groups = {"from_acc_page"})
-    public void TC12_Update_Success_From_Acc_Page() {
-
+    @Test(description = "Click Logout button ")
+    public void TC12_ClickLogoutButton(){
+//        Click Logout button
     }
 }
