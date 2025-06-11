@@ -1,9 +1,9 @@
-package testsuite.api.articles.getfeed;
+package testsuite.api.articles;
 
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-public class TestGetFeed {
+public class TestGetUserFeedArticles {
     private final String ENDPOINT = "https://realworld-api.ap.ngrok.io/api/articles/feeds";
 
     String token = "";
