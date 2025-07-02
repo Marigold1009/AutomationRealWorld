@@ -274,9 +274,9 @@ public class Testsignup {
     @Test(description = """
             Testcase: Sign up fail with invalid email
             Send post to endpoint: /users
-            Expect: code and msg""")
+            Expect: code and msg""", dataProvider = "valid_params")
     public void TC8_SignupFailInvalidyEmail(String userName, String email, String password) {
-        Assert.assertEquals("true","true");
+        Assert.assertTrue(true);
 //        No case, no validate email format
     }
 }

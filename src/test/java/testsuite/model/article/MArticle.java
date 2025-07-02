@@ -105,7 +105,7 @@ public class MArticle {
         return favoritesCount;
     }
 
-    public void setFavoritesCount(int favoritesCounts) {
+    public void setFavoritesCount(int favoritesCount) {
         this.favoritesCount = favoritesCount;
     }
 
