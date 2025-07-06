@@ -1,12 +1,12 @@
 <!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd" >
 
 <suite name="Suite1" verbose="1" >
-    <test name="Test Login Success" >
+    <listeners>
+        <listener class-name="testsuite.utils.ApiLogListener"/>
+    </listeners>
+    <test name="Test Create Article" >
         <classes>
-            <class name="ui.LoginTestSuite" >
-                <methods>
-                    <include name="Test_Case_Login_Success"/>
-                </methods>
+            <class name="testsuite.api.articles.TestCreateArticle" >
             </class>
         </classes>
     </test>
