@@ -10,20 +10,17 @@ import io.restassured.response.Response;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.assertj.core.api.Assertions;
-import org.testng.Reporter;
 import org.testng.annotations.*;
+import testsuite.config.ApiDataFactory;
 import testsuite.model.article.MArticle;
 import testsuite.model.article.MArticleCreate;
 import testsuite.model.user.MUser;
 import testsuite.model.user.MUserDetail;
 import testsuite.utils.ApiLogFactory;
-import testsuite.utils.WriterOutputStream;
 
 import java.io.PrintStream;
 import java.io.StringWriter;
 import java.util.List;
-
-import static io.restassured.RestAssured.with;
 
 public class TestCreateArticle {
     private static final Logger logger = LogManager.getLogger(TestCreateArticle.class);
@@ -31,14 +28,14 @@ public class TestCreateArticle {
     private String token;
     private String title = "test Create Auto01";
     private StringWriter requestResponseLog;
-    private PrintStream requestResponseCaptureStream = ApiLogFactory.getStream();
+    private PrintStream requestResponseCaptureStream;
 
     @BeforeClass
     public void beforeClass() throws JsonProcessingException {
         ApiLogFactory.init();
-        requestResponseLog  = ApiLogFactory.getWriter();
+        requestResponseLog = ApiLogFactory.getWriter();
         requestResponseCaptureStream = ApiLogFactory.getStream();
-        RestAssured.baseURI = "https://realworld-api.ap.ngrok.io/api";
+        RestAssured.baseURI = ApiDataFactory.API_URL;
 
         // Set a global request specification with logging filters
         RestAssured.requestSpecification = RestAssured.given()
@@ -48,9 +45,8 @@ public class TestCreateArticle {
                 );
 
         // Login and save token
-        MUserDetail userDetail = new MUserDetail();
-        userDetail.setEmail("nguyenthucuc996@gmail.com");
-        userDetail.setPassword("Cucvantho09");
+        MUserDetail userDetail = ApiDataFactory.getUserByEmail(ApiDataFactory.USER_001);
+
         MUser user = new MUser();
         user.setUser(userDetail);
         JsonNode node = mapper.valueToTree(user);
@@ -71,8 +67,9 @@ public class TestCreateArticle {
                 .request("GET", "/articles/" + slug);
         String responseString = response.getBody().prettyPrint();
         if (responseString.contains("article does not exist")) {
-            System.out.println("The article does not exist");
+            requestResponseLog.write("The article does not exist, we don't need to delete");
         } else {
+            requestResponseLog.write("The article exists, we need to delete it before test");
             Response responseDelete = RestAssured.given().headers("Content-Type", "application/json",
                             "Authorization", "Token " + token)
                     .request("DELETE", "/articles/" + slug);

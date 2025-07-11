@@ -13,6 +13,7 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
+import testsuite.config.ApiDataFactory;
 import testsuite.model.user.MUser;
 import testsuite.model.user.MUserDetail;
 import testsuite.model.user.MUserLoginError;
@@ -27,13 +28,13 @@ public class Testlogin {
 
     @BeforeClass
     public void BeforeClass() {
-        RestAssured.baseURI = "https://realworld-api.ap.ngrok.io/api";
+        RestAssured.baseURI = ApiDataFactory.API_URL;
         RestAssured.filters(new RequestLoggingFilter(), new ResponseLoggingFilter());
     }
 
     @DataProvider(name = "valid_credentials")
     public Object[][] dpMethod_validCredentials() {
-        return new Object[][]{{"nguyenthucuc996@gmail.com", "Cucvantho09"}};
+        return new Object[][]{{"nguyenthucuc996+1009@gmail.com", "123456"}};
     }
 
     @DataProvider(name = "wrong_email")
@@ -43,7 +44,7 @@ public class Testlogin {
 
     @DataProvider(name = "wrong_password")
     public Object[][] dpMethod_WrongPassword() {
-        return new Object[][]{{"nguyenthucuc996@gmail.com", "abc"}};
+        return new Object[][]{{"nguyenthucuc996+1009@gmail.com", "abc"}};
     }
 
     @DataProvider(name = "wrong_allFields")

@@ -13,6 +13,7 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
+import testsuite.config.ApiDataFactory;
 import testsuite.model.user.MUser;
 import testsuite.model.user.MUserDetail;
 import testsuite.model.user.MUserLoginError;
@@ -33,12 +34,12 @@ public class Testsignup {
     public Object[][] dp_validparams() {
         emailTest = emailTest + System.currentTimeMillis() + "@gmail.com";
         userName = userName + System.currentTimeMillis();
-        return new Object[][]{{emailTest, userName, "Cucvantho09"}};
+        return new Object[][]{{emailTest, userName, "123456"}};
     }
 
     @BeforeClass
     public void beforeClass() {
-        RestAssured.baseURI = "https://realworld-api.ap.ngrok.io/api";
+        RestAssured.baseURI = ApiDataFactory.API_URL;
         RestAssured.filters(new RequestLoggingFilter(), new ResponseLoggingFilter());
     }
 
@@ -216,7 +217,7 @@ public class Testsignup {
     public void TC6_SignupFailExistingEmail(String userName, String email, String password) throws JsonProcessingException {
 //        Init UserDeatils
         MUserDetail userDetail = new MUserDetail();
-        userDetail.setEmail("nguyenthucuc996@gmail.com");
+        userDetail.setEmail("nguyenthucuc996+1009@gmail.com");
         userDetail.setUsername(userName);
         userDetail.setPassword(password);
 

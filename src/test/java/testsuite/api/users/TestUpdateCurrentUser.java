@@ -1,6 +1,8 @@
 package testsuite.api.users;
 
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+import testsuite.model.user.MUserDetail;
 
 public class TestUpdateCurrentUser {
     private final String endpoint = "https://realworld-api.ap.ngrok.io/api/user";
@@ -10,7 +12,10 @@ public class TestUpdateCurrentUser {
             Send put to endpoint api/user
             Expect code and response data""")
     public void TC1_UpdateURLSuccess(String url) {
+        String email = "nguyenthucuc996@gmail.com";
+        email =  "nguyenthucuc996+012312311@gmail.com";
 //        Set token into header
+
 //        Call API and verify response
     }
 

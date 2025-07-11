@@ -10,6 +10,7 @@ import org.assertj.core.api.Assertions;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+import testsuite.config.ApiDataFactory;
 import testsuite.model.article.MArticle;
 import testsuite.model.article.MArticlesResponse;
 import testsuite.model.article.MAuthor;
@@ -30,7 +31,7 @@ public class TestGetArticleList {
 
     @BeforeClass
     public void BeforeClass() {
-        RestAssured.baseURI = "https://realworld-api.ap.ngrok.io/api";
+        RestAssured.baseURI = ApiDataFactory.API_URL;
         RestAssured.filters(new RequestLoggingFilter(), new ResponseLoggingFilter());
     }
 

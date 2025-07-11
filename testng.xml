@@ -6,8 +6,8 @@
     </listeners>
     <test name="Test Create Article" >
         <classes>
-            <class name="testsuite.api.articles.TestCreateArticle" >
-            </class>
+            <class name="testsuite.api.articles.TestCreateArticle" />
+            <class name="testsuite.api.articles.TestGetArticle" />
         </classes>
     </test>
 </suite>

@@ -7,8 +7,10 @@ This document explains the **log-capture design**, including **why we use it**, 
 ## 🎯 Why We Need This
 - We want **detailed RestAssured request/response logs** for every API test, so we can debug and analyze failures.
 - RestAssured logs normally print to the console (`System.out`) — but we need to:
-  ✅ Attach them to TestNG HTML reports  
-  ✅ Log them via log4j  
+
+- ✅ Attach them to TestNG HTML reports  
+  ✅ Log them via log4j: https://logging.apache.org/log4j/2.x/index.html
+- 
   ✅ Support parallel test execution without log contamination  
 - We also want to insert **custom logs** (e.g., “Step 1: Prepare payload”) into the same log stream to create a full picture of each test's execution.
 

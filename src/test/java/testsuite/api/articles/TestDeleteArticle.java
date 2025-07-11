@@ -12,6 +12,7 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+import testsuite.config.ApiDataFactory;
 import testsuite.model.article.MArticle;
 import testsuite.model.article.MArticleCreate;
 import testsuite.model.article.MArticleResponse;
@@ -33,12 +34,13 @@ public class TestDeleteArticle {
 
     @BeforeClass
     public void BeforeClass() throws JsonProcessingException {
-        RestAssured.baseURI = "https://realworld-api.ap.ngrok.io/api";
+        RestAssured.baseURI = ApiDataFactory.API_URL;
         RestAssured.filters(new RequestLoggingFilter(), new ResponseLoggingFilter());
 
+
         MUserDetail userDetail = new MUserDetail();
-        userDetail.setEmail("nguyenthucuc996@gmail.com");
-        userDetail.setPassword("Cucvantho09");
+        userDetail.setEmail("nguyenthucuc996+1009@gmail.com");
+        userDetail.setPassword("123456");
         MUser user = new MUser();
         user.setUser(userDetail);
         JsonNode node = mapper.valueToTree(user);

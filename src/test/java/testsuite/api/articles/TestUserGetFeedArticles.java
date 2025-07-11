@@ -11,6 +11,7 @@ import org.assertj.core.api.Assertions;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+import testsuite.config.ApiDataFactory;
 import testsuite.model.article.*;
 import testsuite.model.user.MUser;
 import testsuite.model.user.MUserDetail;
@@ -33,13 +34,13 @@ public class TestUserGetFeedArticles {
     @BeforeClass
     public void beforeClass() throws JsonProcessingException {
 //        list base url
-        RestAssured.baseURI = "https://realworld-api.ap.ngrok.io/api";
+        RestAssured.baseURI = ApiDataFactory.API_URL;
         RestAssured.filters(new RequestLoggingFilter(), new ResponseLoggingFilter());
 
 //        Login and store toke
         MUserDetail userDetail = new MUserDetail();
-        userDetail.setEmail("nguyenthucuc996@gmail.com");
-        userDetail.setPassword("Cucvantho09");
+        userDetail.setEmail("nguyenthucuc996+1009@gmail.com");
+        userDetail.setPassword("123456");
         MUser user = new MUser();
         user.setUser(userDetail);
         JsonNode node = mapper.valueToTree(user);
