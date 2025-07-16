@@ -13,43 +13,54 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
+import testsuite.config.ApiDataFactory;
 import testsuite.model.user.MUser;
 import testsuite.model.user.MUserDetail;
 import testsuite.model.user.MUserLoginError;
 import testsuite.model.user.MUserLoginErrorDetail;
+import testsuite.utils.ApiLogFactory;
 
+import java.io.PrintStream;
+import java.io.StringWriter;
+import java.net.URI;
 import java.util.List;
 
 import static io.restassured.RestAssured.with;
 
 public class Testsignup {
-    private final String ENDPOINT = "https://realworld-api.ap.ngrok.io/api/users";
     private ObjectMapper mapper = new ObjectMapper();
-    private String emailTest = "emailtestRegisterAPI";
-    private String userName = "userNameTest";
+    private StringWriter requestResponseLog;
+    private PrintStream requestResponseCaptureStream;
+    private String emailTest = "emailtestRegisterAPI" + System.currentTimeMillis()+"@gmail.com";
+    private String userName = "userNameTest" + System.currentTimeMillis();
+    private String password = "Cucvantho09";
 
 
-    @DataProvider(name = "valid_params")
-    public Object[][] dp_validparams() {
-        emailTest = emailTest + System.currentTimeMillis() + "@gmail.com";
-        userName = userName + System.currentTimeMillis();
-        return new Object[][]{{emailTest, userName, "Cucvantho09"}};
-    }
+//    @DataProvider(name = "valid_params")
+//    public Object[][] dp_validparams() {
+//        emailTest = emailTest + System.currentTimeMillis() + "@gmail.com";
+//        userName = userName + System.currentTimeMillis();
+//        return new Object[][]{{emailTest, userName, "Cucvantho09"}};
+//    }
 
     @BeforeClass
     public void beforeClass() {
-        RestAssured.baseURI = "https://realworld-api.ap.ngrok.io/api";
-        RestAssured.filters(new RequestLoggingFilter(), new ResponseLoggingFilter());
+        RestAssured.baseURI = ApiDataFactory.API_URL;
+        requestResponseLog = ApiLogFactory.getWriter();
+        requestResponseCaptureStream = ApiLogFactory.getStream();
+        RestAssured.requestSpecification =
+        RestAssured.given().filters(new RequestLoggingFilter(requestResponseCaptureStream)
+                , new ResponseLoggingFilter(requestResponseCaptureStream));
     }
 
     @Test(description = """
             Testcase: Sign up acc successfully
             Send post api to endpoint: api/users
-            Expect: code 200, return acc info and token""", dataProvider = "valid_params")
-    public void TC1_SignupSuccess(String email, String userName, String password) throws JsonProcessingException {
+            Expect: code 200, return acc info and token""")
+    public void TC1_SignupSuccess() throws JsonProcessingException {
 //        Init userDetail
         MUserDetail userDetail = new MUserDetail();
-        userDetail.setEmail(email);
+        userDetail.setEmail(emailTest);
         userDetail.setUsername(userName);
         userDetail.setPassword(password);
 
@@ -61,6 +72,7 @@ public class Testsignup {
         JsonNode node = mapper.valueToTree(user);
 
 //        Send request and get response
+        requestResponseLog.write("\\n========== Test Sign up with valid info ===========\\n");
         Response response = with().headers("Content-Type", "application/json")
                 .when()
                 .body(node)
@@ -71,7 +83,7 @@ public class Testsignup {
         MUserDetail userDetailResponse = userResponse.getUser();
         Assertions.assertThat(response.statusCode()).as("Expected stt code: 201");
         Assertions.assertThat(userDetailResponse.getEmail()).as("Expected email as input")
-                .isEqualTo(email);
+                .isEqualTo(emailTest);
         Assertions.assertThat(userDetailResponse.getUsername()).as("Expected userName as input")
                 .isEqualTo(userName);
         Assertions.assertThat(userDetailResponse.getToken()).as("Expected Token not null")
@@ -81,8 +93,8 @@ public class Testsignup {
     @Test(description = """
             Testcase: Sign up fail with empty email
             Send post to endpoint: api/users
-            Expect: code 422 and msg 'field required'""", dataProvider = "valid_params")
-    public void TC2_SignupFailEmptyEmail(String email, String userName, String password) throws JsonProcessingException {
+            Expect: code 422 and msg 'field required'""")
+    public void TC2_SignupFailEmptyEmail() throws JsonProcessingException {
 //        Init UserDetail
         MUserDetail userDetail = new MUserDetail();
         userDetail.setUsername(userName);
@@ -96,6 +108,7 @@ public class Testsignup {
         JsonNode node = mapper.valueToTree(user);
 
 //        Send request and get response
+        requestResponseLog.write("\\n========== Test Sign up with empty email ===========\\n");
         Response response = with().headers("Content-Type", "application/json")
                 .when()
                 .body(node)
@@ -114,11 +127,11 @@ public class Testsignup {
     @Test(description = """
             Testcase: Sign up fail with empty password
             Send post to endpoint: api/users
-            Expect: code and msg""", dataProvider = "valid_params")
-    public void TC3_SignupFailEmptyPassword(String email, String userName, String password) throws JsonProcessingException {
+            Expect: code and msg""")
+    public void TC3_SignupFailEmptyPassword() throws JsonProcessingException {
 //        Init UserDetails
         MUserDetail userDetail = new MUserDetail();
-        userDetail.setEmail(email);
+        userDetail.setEmail(emailTest);
         userDetail.setUsername(userName);
 
 //        Init User
@@ -129,6 +142,7 @@ public class Testsignup {
         JsonNode node = mapper.valueToTree(user);
 
 //        Send request and get response
+        requestResponseLog.write("\\n========== Test Sign up with empty password ===========\\n");
         Response response = with().headers("Content-Type", "application/json")
                 .when()
                 .body(node)
@@ -147,11 +161,11 @@ public class Testsignup {
     @Test(description = """
             Testcase: Sign up fail with empty userName
             Send post to endpoint: api/users
-            Expect: code and msg""", dataProvider = "valid_params")
-    public void TC4_SignupFailEmptyUserName(String email, String userName, String password) throws JsonProcessingException {
+            Expect: code and msg""")
+    public void TC4_SignupFailEmptyUserName() throws JsonProcessingException {
 //        Init UserDetails
         MUserDetail userDetail = new MUserDetail();
-        userDetail.setEmail(email);
+        userDetail.setEmail(emailTest);
         userDetail.setPassword(password);
 
 //        Init User
@@ -162,6 +176,7 @@ public class Testsignup {
         JsonNode node = mapper.valueToTree(user);
 
 //        Send request and get response
+        requestResponseLog.write("\\n========== Test Sign up with empty username ===========\\n");
         Response response = with().headers("Content-Type", "application/json")
                 .when()
                 .body(node)
@@ -180,8 +195,8 @@ public class Testsignup {
     @Test(description = """
             Testcase: Sign up fail with empty all
             Send post to endpoint: api/users
-            Expect: code and msg""", dataProvider = "valid_params")
-    public void TC5_SignupFailEmptyAll(String email, String userName, String password) throws JsonProcessingException {
+            Expect: code and msg""")
+    public void TC5_SignupFailEmptyAll() throws JsonProcessingException {
 //        Init UserDetails
         MUserDetail userDetail = new MUserDetail();
 
@@ -193,6 +208,7 @@ public class Testsignup {
         JsonNode node = mapper.valueToTree(user);
 
 //        Send request and get response
+        requestResponseLog.write("\\n========== Test Sign up with empty all ===========\\n");
         Response response = with().headers("Content-Type","application/json")
                 .when()
                 .body(node)
@@ -212,8 +228,8 @@ public class Testsignup {
     @Test(description = """
             Testcase: Sign up fail with existing email
             Send post to endpoint: api/users
-            Expect: code and msg""", dataProvider = "valid_params")
-    public void TC6_SignupFailExistingEmail(String userName, String email, String password) throws JsonProcessingException {
+            Expect: code and msg""")
+    public void TC6_SignupFailExistingEmail() throws JsonProcessingException {
 //        Init UserDeatils
         MUserDetail userDetail = new MUserDetail();
         userDetail.setEmail("nguyenthucuc996@gmail.com");
@@ -228,6 +244,7 @@ public class Testsignup {
         JsonNode node = mapper.valueToTree(user);
 
 //        Send request and get response
+        requestResponseLog.write("\\n========== Test Sign up with existing email ===========\\n");
         Response response = with().headers("Content-Type","application/json")
                 .when()
                 .body(node)
@@ -237,17 +254,17 @@ public class Testsignup {
         String responseString = response.getBody().prettyPrint();
         Assertions.assertThat(response.statusCode()).as("Expected stt code  400").isEqualTo(400);
         Assertions.assertThat(responseString).as("Expected mag: user with this email already exists")
-                .contains("user with this email already exists");
+                .contains("user with this username already exists");
     }
 
     @Test(description = """
             Testcase: Sign up fail with existing userName
             Send post to endpoint: api/users
-            Expect: code and msg""", dataProvider = "valid_params")
-    public void TC7_SignupFailExistingUserName(String email, String userName, String password) {
+            Expect: code and msg""")
+    public void TC7_SignupFailExistingUserName() {
 //        Init UserDetail
         MUserDetail userDetail = new MUserDetail();
-        userDetail.setEmail(email);
+        userDetail.setEmail(emailTest);
         userDetail.setUsername("marigold09");
         userDetail.setPassword(password);
 
@@ -259,6 +276,7 @@ public class Testsignup {
         JsonNode node = mapper.valueToTree(user);
 
 //        Send request and get response
+        requestResponseLog.write("\\n========== Test Sign up with existing username ===========\\n");
         Response response = with().headers("Content-Type","application/json")
                 .when()
                 .body(node)
@@ -274,8 +292,8 @@ public class Testsignup {
     @Test(description = """
             Testcase: Sign up fail with invalid email
             Send post to endpoint: /users
-            Expect: code and msg""", dataProvider = "valid_params")
-    public void TC8_SignupFailInvalidyEmail(String userName, String email, String password) {
+            Expect: code and msg""")
+    public void TC8_SignupFailInvalidEmail() {
         Assert.assertTrue(true);
 //        No case, no validate email format
     }

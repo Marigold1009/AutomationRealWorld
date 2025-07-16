@@ -10,20 +10,28 @@ import io.restassured.response.Response;
 import org.assertj.core.api.Assertions;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+import testsuite.config.ApiDataFactory;
 import testsuite.model.article.MArticle;
 import testsuite.model.article.MArticleCreate;
 import testsuite.model.article.MArticleResponse;
 import testsuite.model.article.MArticlesResponse;
 import testsuite.model.user.MUser;
 import testsuite.model.user.MUserDetail;
+import testsuite.utils.ApiLogFactory;
 
+import java.io.PrintStream;
+import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.List;
 
 import static io.restassured.RestAssured.with;
+import static testsuite.config.ApiDataFactory.USER_001;
+import static testsuite.config.ApiDataFactory.expired_token;
 
 public class TestUpdateArticle {
     private final ObjectMapper mapper = new ObjectMapper();
+    private StringWriter requestResponseLog;
+    private PrintStream requestResponseCaptureStream;
     private String token;
     String userName;
     private String validSlug;
@@ -33,13 +41,15 @@ public class TestUpdateArticle {
 
     @BeforeClass
     public void BeforeClass() throws JsonProcessingException {
-        RestAssured.baseURI = "https://realworld-api.ap.ngrok.io/api";
-        RestAssured.filters(new RequestLoggingFilter(), new ResponseLoggingFilter());
+        RestAssured.baseURI = ApiDataFactory.API_URL;
+        requestResponseLog = ApiLogFactory.getWriter();
+        requestResponseCaptureStream = ApiLogFactory.getStream();
+        RestAssured.requestSpecification =
+        RestAssured.given().filters(new RequestLoggingFilter(requestResponseCaptureStream)
+                , new ResponseLoggingFilter(requestResponseCaptureStream));
 
 //        Login and store token
-        MUserDetail userDetail = new MUserDetail();
-        userDetail.setEmail("nguyenthucuc996@gmail.com");
-        userDetail.setPassword("Cucvantho09");
+        MUserDetail userDetail = ApiDataFactory.getUserByEmail(USER_001);
         MUser user = new MUser();
         user.setUser(userDetail);
         JsonNode node = mapper.valueToTree(user);
@@ -95,6 +105,7 @@ public class TestUpdateArticle {
         article.setArticle(articleUpdate);
 
         JsonNode node = mapper.valueToTree(article);
+        requestResponseLog.write("\\n========== Update article ===========\\n");
         Response response = with().headers("Content-Type", "application/json", "Authorization", "Token " + token)
                 .when().body(node).request("PUT", "/articles/" + validSlug);
         MArticleResponse articleResponse = mapper.readValue(response.getBody().prettyPrint(), MArticleResponse.class);
@@ -117,6 +128,7 @@ public class TestUpdateArticle {
         MArticleCreate articleUpdate01 = new MArticleCreate();
         articleUpdate01.setArticle(articleUpdate);
         JsonNode node = mapper.valueToTree(articleUpdate01);
+        requestResponseLog.write("\\n========== Update article title ===========\\n");
         Response response = with().headers("Content-Type", "application/json", "Authorization", "Token " + token)
                 .body(node).request("PUT", "/articles/" + validSlug);
         MArticleResponse mArticleResponse = mapper.readValue(response.getBody().prettyPrint(), MArticleResponse.class);
@@ -139,6 +151,7 @@ public class TestUpdateArticle {
         MArticleCreate articleUpdate01 = new MArticleCreate();
         articleUpdate01.setArticle(articleUpdate);
         JsonNode node = mapper.valueToTree(articleUpdate01);
+        requestResponseLog.write("\\n========== Update article body===========\\n");
         Response response = with().headers("Content-Type", "application/json", "Authorization", "Token " + token)
                 .body(node).request("PUT", "/articles/" + validSlug);
         MArticleResponse mArticleResponse = mapper.readValue(response.getBody().prettyPrint(), MArticleResponse.class);
@@ -160,6 +173,7 @@ public class TestUpdateArticle {
         MArticleCreate articleUpdate01 = new MArticleCreate();
         articleUpdate01.setArticle(articleUpdate);
         JsonNode node = mapper.valueToTree(articleUpdate01);
+        requestResponseLog.write("\\n========== Update article description ===========\\n");
         Response response = with().headers("Content-Type", "application/json", "Authorization", "Token " + token)
                 .body(node).request("PUT", "/articles/" + validSlug);
         MArticleResponse mArticleResponse = mapper.readValue(response.getBody().prettyPrint(), MArticleResponse.class);
@@ -181,6 +195,7 @@ public class TestUpdateArticle {
         MArticleCreate articleUpdate01 = new MArticleCreate();
         articleUpdate01.setArticle(articleUpdate);
         JsonNode node = mapper.valueToTree(articleUpdate01);
+        requestResponseLog.write("\\n========== Update article without token ===========\\n");
         Response response = with()
                 .body(node).request("PUT", "/articles/" + validSlug);
         String responseString = response.getBody().prettyPrint();
@@ -199,6 +214,7 @@ public class TestUpdateArticle {
         MArticleCreate articleUpdate01 = new MArticleCreate();
         articleUpdate01.setArticle(articleUpdate);
         JsonNode node = mapper.valueToTree(articleUpdate01);
+        requestResponseLog.write("\\n========== Update article with invalid token ===========\\n");
         Response response = with().headers("Content-Type", "application/json", "Authorization", "Token" + token)
                 .body(node).when().request("PUT", "/articles/" + validSlug);
         String responseString = response.getBody().prettyPrint();
@@ -211,14 +227,14 @@ public class TestUpdateArticle {
             Send PUT to end point: /articles/{slug}
             Expected stt and msg""")
     public void TC7_UpdateArticle_Fail_ExpiredToken() {
-        String expiredToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6Im1hcmlnb2xkMDkiLCJleHAiOjE3NDY5NzMzNjYsInN1YiI6ImFjY2VzcyJ9.w3-XXsq1yZX6ItP3aBOFBjiYWPeTQ72pADYH504hV-Y";
         MArticle articleUpdate = new MArticle();
         articleUpdate = validArticle;
         articleUpdate.setDescription(validArticle.getBody() + System.currentTimeMillis());
         MArticleCreate articleUpdate01 = new MArticleCreate();
         articleUpdate01.setArticle(articleUpdate);
         JsonNode node = mapper.valueToTree(articleUpdate01);
-        Response response = with().headers("Content-Type", "application/json", "Authorization", "Token " + expiredToken)
+        requestResponseLog.write("\\n========== Update article with expired token ===========\\n");
+        Response response = with().headers("Content-Type", "application/json", "Authorization", "Token " + expired_token)
                 .body(node).when().request("PUT", "/articles/" + validSlug);
         String responseString = response.getBody().prettyPrint();
         Assertions.assertThat(response.statusCode()).as("Expected code 403").isEqualTo(403);
@@ -237,6 +253,7 @@ public class TestUpdateArticle {
         MArticleCreate articleUpdate01 = new MArticleCreate();
         articleUpdate01.setArticle(articleUpdate);
         JsonNode node = mapper.valueToTree(articleUpdate01);
+        requestResponseLog.write("\\n========== Update article with empty titile ===========\\n");
         Response response = with().headers("Content-Type", "application/json", "Authorization", "Token " + token)
                 .body(node).when().request("PUT", "/articles/" + validSlug);
         Assertions.assertThat(response.statusCode()).as("Expected stt 200").isEqualTo(200);
@@ -258,6 +275,7 @@ public class TestUpdateArticle {
         MArticleCreate articleUpdate01 = new MArticleCreate();
         articleUpdate01.setArticle(articleUpdate);
         JsonNode node = mapper.valueToTree(articleUpdate01);
+        requestResponseLog.write("\\n========== Update article with invalid slug ===========\\n");
         Response response = with().headers("Content-Type", "application/json", "Authorization", "Token " + token)
                 .body(node).when().request("PUT", "/articles/" + NoAuthorSlug);
         String responseString = response.getBody().prettyPrint();
@@ -277,6 +295,7 @@ public class TestUpdateArticle {
         MArticleCreate articleUpdate01 = new MArticleCreate();
         articleUpdate01.setArticle(articleUpdate);
         JsonNode node = mapper.valueToTree(articleUpdate01);
+        requestResponseLog.write("\\n========== Update article with empty slug ===========\\n");
         Response response = with().headers("Content-Type", "application/json", "Authorization", "Token " + token)
                 .body(node).when().request("PUT", "/articles");
         String responseString = response.getBody().prettyPrint();
@@ -295,6 +314,7 @@ public class TestUpdateArticle {
         MArticleCreate articleUpdate01 = new MArticleCreate();
         articleUpdate01.setArticle(articleUpdate);
         JsonNode node = mapper.valueToTree(articleUpdate01);
+        requestResponseLog.write("\\n========== Update article with invalid slug ===========\\n");
         Response response = with().headers("Content-Type","application/json","Authorization","Token "+token)
                 .when().body(node).request("PUT","/articles/"+invalidSlug);
         String responseString = response.getBody().prettyPrint();

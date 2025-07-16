@@ -13,22 +13,32 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
+import testsuite.config.ApiDataFactory;
 import testsuite.model.user.MUser;
 import testsuite.model.user.MUserDetail;
 import testsuite.model.user.MUserLoginError;
 import testsuite.model.user.MUserLoginErrorDetail;
+import testsuite.utils.ApiLogFactory;
 
+import java.io.PrintStream;
+import java.io.StringWriter;
 import java.util.List;
 
 import static io.restassured.RestAssured.with;
 
 public class Testlogin {
     private ObjectMapper MAPPER = new ObjectMapper();
+    private StringWriter requestResponseLog;
+    private PrintStream requestResponseCaptureStream;
 
     @BeforeClass
     public void BeforeClass() {
-        RestAssured.baseURI = "https://realworld-api.ap.ngrok.io/api";
-        RestAssured.filters(new RequestLoggingFilter(), new ResponseLoggingFilter());
+        RestAssured.baseURI = ApiDataFactory.API_URL;
+        requestResponseLog = ApiLogFactory.getWriter();
+        requestResponseCaptureStream = ApiLogFactory.getStream();
+        RestAssured.requestSpecification =
+        RestAssured.given().filters(new RequestLoggingFilter(requestResponseCaptureStream)
+                , new ResponseLoggingFilter(requestResponseCaptureStream));
     }
 
     @DataProvider(name = "valid_credentials")
@@ -69,6 +79,7 @@ public class Testlogin {
         JsonNode node = MAPPER.valueToTree(user);
 
 //        Send request and get response
+        requestResponseLog.write("\\n========== Test Login with valid info ===========\\n");
         Response response = with().header("Content-Type", "application/json").body(node)
                 .when()
                 .request("POST", "users/login");
@@ -99,6 +110,7 @@ public class Testlogin {
         JsonNode node = MAPPER.valueToTree(user);
 
 //        Send request and get response
+        requestResponseLog.write("\\n========== Test Login with empty email ===========\\n");
         Response response = with().header("Content-Type", "application/json")
                 .body(node)
                 .when()
@@ -130,6 +142,7 @@ public class Testlogin {
         JsonNode node = MAPPER.valueToTree(user);
 
 //        Send request and get response
+        requestResponseLog.write("\\n========== Test Login with empty password ===========\\n");
         Response response = with().header("Content-Type", "application/json")
                 .when()
                 .body(node)
@@ -162,6 +175,7 @@ public class Testlogin {
         JsonNode node = MAPPER.valueToTree(user);
 
 //        Send request
+        requestResponseLog.write("\\n========== Test Login with empty email, password ===========\\n");
         Response response = with().headers("Content-Type", "application/json")
                 .when()
                 .body(node)
@@ -195,6 +209,7 @@ public class Testlogin {
         JsonNode node = MAPPER.valueToTree(user);
 
 //        Send request and get response
+        requestResponseLog.write("\\n========== Test Login with wrong email ===========\\n");
         Response response = with().headers("Content-Type", "application/json")
                 .when()
                 .body(node)
@@ -230,6 +245,7 @@ public class Testlogin {
         JsonNode node = MAPPER.valueToTree(user);
 
 //        Send request and get response
+        requestResponseLog.write("\\n========== Test Login with wrong password ===========\\n");
         Response response = with().headers("Content-Type", "application/json")
                 .when()
                 .body(node)
@@ -260,6 +276,7 @@ public class Testlogin {
         JsonNode node = MAPPER.valueToTree(user);
 
 //        Send request and get response
+        requestResponseLog.write("\\n========== Test Login with wrong email and password ===========\\n");
         Response response = with().headers("Content-Type", "application/json")
                 .when()
                 .body(node)
@@ -288,7 +305,8 @@ public class Testlogin {
         user.setUser(userDetail);
 
         JsonNode node = MAPPER.valueToTree(user);
-        Response resposne = with().headers("COntent-Type","application/json")
+        requestResponseLog.write("\\n========== Test Login with non existing email ===========\\n");
+        Response resposne = with().headers("Content-Type","application/json")
                 .when()
                 .body(node)
                 .request("POST","users/login");

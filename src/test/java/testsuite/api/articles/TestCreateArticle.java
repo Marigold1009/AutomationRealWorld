@@ -12,8 +12,10 @@ import org.apache.logging.log4j.Logger;
 import org.assertj.core.api.Assertions;
 import org.testng.Reporter;
 import org.testng.annotations.*;
+import testsuite.config.ApiDataFactory;
 import testsuite.model.article.MArticle;
 import testsuite.model.article.MArticleCreate;
+import testsuite.model.article.MArticleResponse;
 import testsuite.model.user.MUser;
 import testsuite.model.user.MUserDetail;
 import testsuite.utils.ApiLogFactory;
@@ -24,21 +26,22 @@ import java.io.StringWriter;
 import java.util.List;
 
 import static io.restassured.RestAssured.with;
+import static testsuite.config.ApiDataFactory.USER_001;
 
 public class TestCreateArticle {
     private static final Logger logger = LogManager.getLogger(TestCreateArticle.class);
     private final ObjectMapper mapper = new ObjectMapper();
     private String token;
-    private String title = "test Create Auto01";
+    private String title = "test Create Auto002";
     private StringWriter requestResponseLog;
     private PrintStream requestResponseCaptureStream = ApiLogFactory.getStream();
 
     @BeforeClass
     public void beforeClass() throws JsonProcessingException {
         ApiLogFactory.init();
-        requestResponseLog  = ApiLogFactory.getWriter();
+        requestResponseLog = ApiLogFactory.getWriter();
         requestResponseCaptureStream = ApiLogFactory.getStream();
-        RestAssured.baseURI = "https://realworld-api.ap.ngrok.io/api";
+        RestAssured.baseURI = ApiDataFactory.API_URL;
 
         // Set a global request specification with logging filters
         RestAssured.requestSpecification = RestAssured.given()
@@ -48,9 +51,7 @@ public class TestCreateArticle {
                 );
 
         // Login and save token
-        MUserDetail userDetail = new MUserDetail();
-        userDetail.setEmail("nguyenthucuc996@gmail.com");
-        userDetail.setPassword("Cucvantho09");
+        MUserDetail userDetail = ApiDataFactory.getUserByEmail(USER_001);
         MUser user = new MUser();
         user.setUser(userDetail);
         JsonNode node = mapper.valueToTree(user);
@@ -72,15 +73,19 @@ public class TestCreateArticle {
         String responseString = response.getBody().prettyPrint();
         if (responseString.contains("article does not exist")) {
             System.out.println("The article does not exist");
+            requestResponseLog.write("The article does not exist, dont need delete");
         } else {
+            requestResponseLog.write("The article exists, we need to delete it before test");
             Response responseDelete = RestAssured.given().headers("Content-Type", "application/json",
                             "Authorization", "Token " + token)
                     .request("DELETE", "/articles/" + slug);
             int responseDeleteCode = responseDelete.statusCode();
             if (responseDeleteCode == 204) {
                 System.out.println("Delete the article successfully");
+                requestResponseLog.write("Delete the article successfully");
             } else {
                 System.out.println("Something went wrong");
+                requestResponseLog.write("Something went wrong");
             }
         }
     }
@@ -124,16 +129,20 @@ public class TestCreateArticle {
                 .request("POST", "/articles");
 
 //        Assert
-        JsonNode rootNode = mapper.readTree(response.getBody().asString());
-        JsonNode articleNode = rootNode.get("article");
-        MArticle articleResponse = mapper.treeToValue(articleNode, MArticle.class);
+//        JsonNode rootNode = mapper.readTree(response.getBody().asString());
+//        JsonNode articleNode = rootNode.get("article");
+        MArticleResponse articleResponse = new MArticleResponse();
+        articleResponse = mapper.readValue(response.getBody().prettyPrint(), MArticleResponse.class);
+        MArticle article1 = new MArticle();
+        article1 = articleResponse.getArticle();
+
         Assertions.assertThat(response.statusCode()).as("Expected stt code: 201")
                 .isEqualTo(201);
-        Assertions.assertThat(articleResponse.getTitle()).as("Expected title: {title}")
+        Assertions.assertThat(article1.getTitle()).as("Expected title: {title}")
                 .contains(title);
-        Assertions.assertThat(articleResponse.getBody()).as("Expected title: {body}")
+        Assertions.assertThat(article1.getBody()).as("Expected title: {body}")
                 .contains(body);
-        Assertions.assertThat(articleResponse.getDescription()).as("Expected title: {description}")
+        Assertions.assertThat(article1.getDescription()).as("Expected title: {description}")
                 .contains(description);
     }
 
@@ -163,6 +172,7 @@ public class TestCreateArticle {
                 .request("POST", "/articles");
 
 //        Assert
+        requestResponseLog.write("\n==========Test create article withot token==========\n");
         String responseString = response.getBody().prettyPrint();
         Assertions.assertThat(responseString).as("Expected msg: authentication required")
                 .contains("authentication required");
@@ -189,6 +199,7 @@ public class TestCreateArticle {
         JsonNode node = mapper.valueToTree(articleCreate);
 
 //        Send request and get response
+        requestResponseLog.write("n==========Test create article with invalid token==========\n");
         Response response = RestAssured.given().headers("Content-Type", "application/json",
                         "Authorization", "abc")
                 .when()
@@ -221,6 +232,7 @@ public class TestCreateArticle {
         JsonNode node = mapper.valueToTree(articleCreate);
 
 //        Send request and get response
+        requestResponseLog.write("n==========Test create article without title==========\n");
         Response response = RestAssured.given().headers("Content-Type", "application/json",
                         "Authorization", "Token " + token)
                 .when()
@@ -258,6 +270,7 @@ public class TestCreateArticle {
         JsonNode node = mapper.valueToTree(articleCreate);
 
 //        Send request and get response
+        requestResponseLog.write("n==========Test create article with existing title==========\n");
         Response response = RestAssured.given().headers("Content-Type", "application/json",
                         "Authorization", "Token " + token)
                 .when()

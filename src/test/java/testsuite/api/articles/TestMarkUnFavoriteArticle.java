@@ -11,30 +11,40 @@ import org.assertj.core.api.Assertions;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+import testsuite.config.ApiDataFactory;
 import testsuite.model.article.MArticle;
 import testsuite.model.article.MArticleResponse;
 import testsuite.model.article.MArticlesResponse;
 import testsuite.model.user.MUser;
 import testsuite.model.user.MUserDetail;
+import testsuite.utils.ApiLogFactory;
 
+import java.io.PrintStream;
+import java.io.StringWriter;
 import java.util.List;
 
 import static io.restassured.RestAssured.with;
+import static testsuite.config.ApiDataFactory.USER_001;
+import static testsuite.config.ApiDataFactory.expired_token;
 
 public class TestMarkUnFavoriteArticle {
     private final ObjectMapper mapper = new ObjectMapper();
+    private StringWriter requestResponseLog;
+    private PrintStream requestResponseCaptureLog;
     String token;
     String slug;
 
     @BeforeClass
     public void BeforeClass() throws JsonProcessingException {
-        RestAssured.baseURI = "https://realworld-api.ap.ngrok.io/api";
-        RestAssured.filters(new RequestLoggingFilter(), new ResponseLoggingFilter());
+        RestAssured.baseURI = ApiDataFactory.API_URL;
+        requestResponseLog = ApiLogFactory.getWriter();
+        requestResponseCaptureLog = ApiLogFactory.getStream();
+        RestAssured.requestSpecification =
+        RestAssured.given().filters(new RequestLoggingFilter(requestResponseCaptureLog)
+                , new ResponseLoggingFilter(requestResponseCaptureLog));
 
 //        Login and get token
-        MUserDetail userDetail= new MUserDetail();
-        userDetail.setEmail("nguyenthucuc996@gmail.com");
-        userDetail.setPassword("Cucvantho09");
+        MUserDetail userDetail= ApiDataFactory.getUserByEmail(USER_001);
         MUser user = new MUser();
         user.setUser(userDetail);
         JsonNode node =  mapper.valueToTree(user);
@@ -70,6 +80,7 @@ public class TestMarkUnFavoriteArticle {
             Send delete to endpoint api/articles/{slug}/favorite
             Expect code  and response""")
     public void TC1_MarkUnFavoriteSuccess() throws JsonProcessingException {
+        requestResponseLog.write("\\n========== Mark unfavorite article ===========\\n");
         Response response = with().headers("Content-Type","application/json","Authorization","Token "+token)
                 .when().request("DELETE","/articles/"+slug+"/favorite");
         Assertions.assertThat(response.statusCode()).as("Expected code: 200").isEqualTo(200);
@@ -83,6 +94,7 @@ public class TestMarkUnFavoriteArticle {
             Send delete to endpoint api/articles/{slug}/favorite
             Expect code and msg""")
     public void TC2_MarkUnFavoriteFailEmptyToken() {
+        requestResponseLog.write("\\n========== Mark unfavorite article without token===========\\n");
         Response response = with()
                 .when().request("DELETE","/articles/"+slug+"/favorite");
         Assertions.assertThat(response.statusCode()).as("Expected: 403").isEqualTo(403);
@@ -96,6 +108,7 @@ public class TestMarkUnFavoriteArticle {
             Send delete to endpoint api/articles/{slug}/favorite
             Expect code and msg""")
     public void TC3_MarkUnFavoriteFailInvalidToken() {
+        requestResponseLog.write("\\n========== Mark unfavorite article with invalid token ===========\\n");
         Response response = with().headers("Content-Type","application/json", "Authorization","Token"+token)
                 .when().request("DELETE","/articles/"+slug+"/favorite");
         Assertions.assertThat(response.statusCode()).as("Expected:403 ").isEqualTo(403);
@@ -109,8 +122,8 @@ public class TestMarkUnFavoriteArticle {
             Send delete to endpoint api/articles/{slug}/favorite
             Expect code and msg""")
     public void TC4_MarkUnFavoriteFailExpiredToken() {
-        String expiredToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6Im1hcmlnb2xkMDkiLCJleHAiOjE3NDY5NzMzNjYsInN1YiI6ImFjY2VzcyJ9.w3-XXsq1yZX6ItP3aBOFBjiYWPeTQ72pADYH504hV-Y";
-        Response response = with().headers("Content-Type","application/json","Authorization", "Token "+expiredToken)
+        requestResponseLog.write("\\n========== Mark unfavorite article with expired token===========\\n");
+        Response response = with().headers("Content-Type","application/json","Authorization", "Token "+expired_token)
                 .when().request("DELETE","/articles/"+slug+"/favorite");
         Assertions.assertThat(response.statusCode()).as("Expected code: 403").isEqualTo(403);
         String responseString = response.getBody().prettyPrint();
@@ -123,6 +136,7 @@ public class TestMarkUnFavoriteArticle {
             Send delete to endpoint api/articles/{slug}/favorite
             Expect code and msg""")
     public void TC5_MarkUnFavoriteFailNonExistingToken() {
+        requestResponseLog.write("\\n========== Mark unfavorite article with non existing token===========\\n");
         String nonExistingToken = "abcdefghydjd";
         Response response = with().headers("Content-Type","application/json","Authorization","Token "+nonExistingToken)
                 .when().request("DELETE","/articles/"+slug+"/favorite");
@@ -137,6 +151,7 @@ public class TestMarkUnFavoriteArticle {
             Send delete to endpoint api/articles/{slug}/favorite
             Expect code and msg""")
     public void TC6_MarkUnFavoriteFailEmptySlug() {
+        requestResponseLog.write("\\n========== Mark unfavorite article without slug===========\\n");
         Response response = with().headers("Content-Type","application/json","Authorization","Token "+token)
                 .when().request("DELETE","/articles/favorite");
         Assertions.assertThat(response.statusCode()).as("Expected: 404").isEqualTo(404);
@@ -150,6 +165,7 @@ public class TestMarkUnFavoriteArticle {
             Send delete to endpoint api/articles/{slug}/favorite
             Expect code and msg""")
     public void TC7_MarkUnFavoriteFailNonExistingSlug() {
+        requestResponseLog.write("\\n========== Mark unfavorite article with non existing slug===========\\n");
         String nonExistingSlug = slug + System.currentTimeMillis();
         Response response = with().headers("Content-Type","application/json","Authorization","Token "+token)
                 .when().request("DELETE","/articles/"+nonExistingSlug+"favorite");
@@ -160,10 +176,11 @@ public class TestMarkUnFavoriteArticle {
     }
 
     @Test(description = """
-            Testcase UnMark article favorite unsuccessfully with unfavrited article
+            Testcase UnMark article favorite unsuccessfully with unfavorited article
             Send delete to endpoint api/articles/{slug}/favrite
             Expect code and msg""")
     public void TC8_MarkUnFavoriteFailUnMarkedArticle() {
+        requestResponseLog.write("\\n========== Mark unfavorite article for unfavorited articles ===========\\n");
         with().headers("Content-Type","application/json","Authorization","Token "+token)
                 .when().request("DELETE","/articles/"+slug+"/favorite");
         Response response= with().headers("Content-Type","application/json","Authorization","Token "+token)

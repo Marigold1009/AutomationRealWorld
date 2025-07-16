@@ -12,19 +12,27 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+import testsuite.config.ApiDataFactory;
 import testsuite.model.article.MArticle;
 import testsuite.model.article.MArticleCreate;
 import testsuite.model.article.MArticleResponse;
 import testsuite.model.article.MArticlesResponse;
 import testsuite.model.user.MUser;
 import testsuite.model.user.MUserDetail;
+import testsuite.utils.ApiLogFactory;
 
+import java.io.PrintStream;
+import java.io.StringWriter;
 import java.util.List;
 
 import static io.restassured.RestAssured.with;
+import static testsuite.config.ApiDataFactory.USER_001;
+import static testsuite.config.ApiDataFactory.expired_token;
 
 public class TestDeleteArticle {
     private final ObjectMapper mapper = new ObjectMapper();
+    private StringWriter requestResponseLog;
+    private PrintStream requestResponseCaptureStream;
     private String token;
     private String validSlug;
     private String invalidSlug;
@@ -33,18 +41,25 @@ public class TestDeleteArticle {
 
     @BeforeClass
     public void BeforeClass() throws JsonProcessingException {
-        RestAssured.baseURI = "https://realworld-api.ap.ngrok.io/api";
-        RestAssured.filters(new RequestLoggingFilter(), new ResponseLoggingFilter());
+//        declare variable  --> Init ApiLogFactory and call GetWriter and Géttream
+        RestAssured.baseURI = ApiDataFactory.API_URL;
+        ApiLogFactory.init();
+        requestResponseLog = ApiLogFactory.getWriter();
+        requestResponseCaptureStream = ApiLogFactory.getStream();
 
-        MUserDetail userDetail = new MUserDetail();
-        userDetail.setEmail("nguyenthucuc996@gmail.com");
-        userDetail.setPassword("Cucvantho09");
+//      Set a global request specification with logging filters
+        RestAssured.requestSpecification =
+                RestAssured.given()
+                        .filters(new RequestLoggingFilter(requestResponseCaptureStream),
+                                new ResponseLoggingFilter(requestResponseCaptureStream));
+
+        MUserDetail userDetail = ApiDataFactory.getUserByEmail(USER_001);
         MUser user = new MUser();
         user.setUser(userDetail);
         JsonNode node = mapper.valueToTree(user);
-        Response response = with().header("Content-Type","application/json")
-                .when().body(node).request("POST","/users/login");
-        user = mapper.readValue(response.getBody().prettyPrint(),MUser.class);
+        Response response = with().header("Content-Type", "application/json")
+                .when().body(node).request("POST", "/users/login");
+        user = mapper.readValue(response.getBody().prettyPrint(), MUser.class);
         userDetail = user.getUser();
         token = userDetail.getToken();
         userName = userDetail.getUsername();
@@ -64,34 +79,35 @@ public class TestDeleteArticle {
     public void BeforeMethod() throws JsonProcessingException {
 //        Create article and get slug
         MArticle article = new MArticle();
-        article.setTitle("Test delete article"+System.currentTimeMillis());
+        article.setTitle("Test delete article" + System.currentTimeMillis());
         article.setBody("Test delete article_Body");
         article.setDescription("Test delete article_Description");
         MArticleCreate articleCreate = new MArticleCreate();
         articleCreate.setArticle(article);
         JsonNode node = mapper.valueToTree(articleCreate);
-        Response response = with().headers("Content-Type","application/json","Authorization","Token "+token)
-                .when().body(node).request("POST","/articles");
-        MArticleResponse mArticleResponse = mapper.readValue(response.getBody().prettyPrint(),MArticleResponse.class);
+        Response response = with().headers("Content-Type", "application/json", "Authorization", "Token " + token)
+                .when().body(node).request("POST", "/articles");
+        MArticleResponse mArticleResponse = mapper.readValue(response.getBody().prettyPrint(), MArticleResponse.class);
         MArticle article1 = mArticleResponse.getArticle();
         validSlug = article1.getSlug();
         invalidSlug = article1.getSlug() + System.currentTimeMillis();
     }
 
     @AfterMethod
-    public void AfterMethod(){
+    public void AfterMethod() {
 //        Delete article
-        with().headers("Content-Type","application/json","Authorization","Token "+token)
-                .when().request("DELETE","/articles/"+validSlug);
+        with().headers("Content-Type", "application/json", "Authorization", "Token " + token)
+                .when().request("DELETE", "/articles/" + validSlug);
     }
 
     @Test(description = """
             Testcase: Delete article sucessfully
             Send DELETE to endpoint: /articles/{slug}
             Expected code 204""")
-    public void TC1_DeleteArticle_Success(){
-        Response response = with().headers("Content-Type","application/json","Authorization", "Token "+token)
-                .when().request("DELETE","/articles/"+validSlug);
+    public void TC1_DeleteArticle_Success() {
+        requestResponseLog.write("n==========Test Delete article successfully==========\n");
+        Response response = with().headers("Content-Type", "application/json", "Authorization", "Token " + token)
+                .when().request("DELETE", "/articles/" + validSlug);
         Assertions.assertThat(response.statusCode()).isEqualTo(204);
     }
 
@@ -99,8 +115,9 @@ public class TestDeleteArticle {
             Testcase: Delete article fail, no header
             Send Delete to endpoint /articles/{slug}
             Expected code and msg""")
-    public void TC2_DeleteArticle_Unsuccess_Noheader(){
-        Response response = with().when().request("DELETE","/articles/"+validSlug);
+    public void TC2_DeleteArticle_Unsuccess_Noheader() {
+        requestResponseLog.write("n==========Test delete article without token==========\n");
+        Response response = with().when().request("DELETE", "/articles/" + validSlug);
         Assertions.assertThat(response.statusCode()).isEqualTo(403);
         String responseString = response.getBody().prettyPrint();
         Assertions.assertThat(responseString).contains("authentication required");
@@ -108,9 +125,10 @@ public class TestDeleteArticle {
 
     @Test(description = """
             Testcase: Delete article fail, wrong header""")
-    public void TC3_DeleteArticle_Unsuccess_WrongFormatToken(){
-        Response response = with().headers("Content-Type","application/json","Authorization","Token"+token)
-        .when().request("DELETE","/articles/"+validSlug);
+    public void TC3_DeleteArticle_Unsuccess_WrongFormatToken() {
+        requestResponseLog.write("n==========Test deletee article with invalid token==========\n");
+        Response response = with().headers("Content-Type", "application/json", "Authorization", "Token" + token)
+                .when().request("DELETE", "/articles/" + validSlug);
         Assertions.assertThat(response.statusCode()).isEqualTo(403);
         String responseString = response.getBody().prettyPrint();
         Assertions.assertThat(responseString).contains("unsupported authorization type");
@@ -118,10 +136,10 @@ public class TestDeleteArticle {
 
     @Test(description = """
             Testcase: Delete article fail, expired token""")
-    public void TC4_DeleteArticle_Fail_ExpiredToken(){
-        String expiredToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6Im1hcmlnb2xkMDkiLCJleHAiOjE3NDY5NzMzNjYsInN1YiI6ImFjY2VzcyJ9.w3-XXsq1yZX6ItP3aBOFBjiYWPeTQ72pADYH504hV-Y";
-        Response response = with().headers("Content-Type","application/json","Authorization","Token "+expiredToken)
-                .when().request("DELETE","/articles/"+validSlug);
+    public void TC4_DeleteArticle_Fail_ExpiredToken() {
+        requestResponseLog.write("n==========Test delete article with expired token==========\n");
+        Response response = with().headers("Content-Type", "application/json", "Authorization", "Token " + expired_token)
+                .when().request("DELETE", "/articles/" + validSlug);
         Assertions.assertThat(response.statusCode()).isEqualTo(403);
         String responseString = response.getBody().prettyPrint();
         Assertions.assertThat(responseString).contains("could not validate credentials");
@@ -129,9 +147,10 @@ public class TestDeleteArticle {
 
     @Test(description = """
             Testcase: Delete fail article non existing""")
-    public void TC5_DeleteArticle_Fail_NonExisting(){
-        Response response = with().headers("Content-Type","application/json","Authorization","Token "+token)
-                .when().request("DELETE","/articles/"+invalidSlug);
+    public void TC5_DeleteArticle_Fail_NonExisting() {
+        requestResponseLog.write("n==========Test delete article with non existing token==========\n");
+        Response response = with().headers("Content-Type", "application/json", "Authorization", "Token " + token)
+                .when().request("DELETE", "/articles/" + invalidSlug);
         Assertions.assertThat(response.statusCode()).isEqualTo(404);
         String responseString = response.getBody().prettyPrint();
         Assertions.assertThat(responseString).contains("article does not exist");
@@ -139,9 +158,10 @@ public class TestDeleteArticle {
 
     @Test(description = """
             Testcase: Delete fail article is an other author""")
-    public void TC6_DeleteArticle_Fail_AnOtherAuthor(){
-        Response response = with().headers("Content-Type","application/json","Authorization","Token "+token)
-                .when().request("DELETE","/articles/"+notauthorSlug);
+    public void TC6_DeleteArticle_Fail_AnOtherAuthor() {
+        requestResponseLog.write("n==========Test delete article, not owned by the user==========\n");
+        Response response = with().headers("Content-Type", "application/json", "Authorization", "Token " + token)
+                .when().request("DELETE", "/articles/" + notauthorSlug);
         Assertions.assertThat(response.statusCode()).isEqualTo(403);
         String responseString = response.getBody().prettyPrint();
         Assertions.assertThat(responseString).contains("you are not an author of this article");
@@ -149,9 +169,10 @@ public class TestDeleteArticle {
 
     @Test(description = """
             Testcase: Delete fail without slug""")
-    public void TC7_Delete_fail_NoSlug(){
-        Response response = with().headers("Content-Type","application/json","Authorization","Token "+token)
-                .when().request("DELETE","/articles");
+    public void TC7_Delete_fail_NoSlug() {
+        requestResponseLog.write("n==========Test delete article without slug==========\n");
+        Response response = with().headers("Content-Type", "application/json", "Authorization", "Token " + token)
+                .when().request("DELETE", "/articles");
         Assertions.assertThat(response.statusCode()).isEqualTo(405);
         String responseString = response.getBody().prettyPrint();
         Assertions.assertThat(responseString).contains("Method Not Allowed");

@@ -11,31 +11,42 @@ import org.assertj.core.api.Assertions;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+import testsuite.config.ApiDataFactory;
 import testsuite.model.article.MArticle;
 import testsuite.model.article.MArticleResponse;
 import testsuite.model.article.MArticlesResponse;
 import testsuite.model.user.MUser;
 import testsuite.model.user.MUserDetail;
+import testsuite.utils.ApiLogFactory;
 
+import java.io.PrintStream;
+import java.io.StringWriter;
 import java.util.List;
 
 import static io.restassured.RestAssured.with;
+import static testsuite.config.ApiDataFactory.USER_001;
+import static testsuite.config.ApiDataFactory.expired_token;
 
 public class TestMarkFavoriteArticle {
     private final ObjectMapper mapper = new ObjectMapper();
+    private StringWriter requestResponseLog;
+    private PrintStream requestResponseCaptureStream;
     private String token;
     MArticle articleTest = new MArticle();
     String slug;
 
     @BeforeClass
     public void BeforeClass() throws JsonProcessingException {
-        RestAssured.baseURI = "https://realworld-api.ap.ngrok.io/api";
-        RestAssured.filters(new RequestLoggingFilter(), new ResponseLoggingFilter());
+        RestAssured.baseURI = ApiDataFactory.API_URL;
+        requestResponseLog = ApiLogFactory.getWriter();
+        requestResponseCaptureStream = ApiLogFactory.getStream();
+
+        RestAssured.requestSpecification =
+        RestAssured.given().filters(new RequestLoggingFilter(requestResponseCaptureStream)
+                , new ResponseLoggingFilter(requestResponseCaptureStream));
 
 //        login and store token
-        MUserDetail userDetail = new MUserDetail();
-        userDetail.setEmail("nguyenthucuc996@gmail.com");
-        userDetail.setPassword("Cucvantho09");
+        MUserDetail userDetail = ApiDataFactory.getUserByEmail(USER_001);
         MUser user = new MUser();
         user.setUser(userDetail);
         JsonNode node = mapper.valueToTree(user);
@@ -74,6 +85,7 @@ public class TestMarkFavoriteArticle {
             Send post to endpoint api/articles/{slug}/favorite
             Expect code  and response""")
     public void TC1_MarkFarvouriteSuccess() throws JsonProcessingException {
+        requestResponseLog.write("\\n========== Mark favorite article ===========\\n");
         Response response = with().headers("Content-Type", "application/json", "Authorization", "Token " + token)
                 .when()
                 .request("POST", "articles/" + slug + "/favorite");
@@ -88,6 +100,7 @@ public class TestMarkFavoriteArticle {
             Send post to endpoint api/articles/{slug}/favourite
             Expect code and msg""")
     public void TC2_MarkFarvouriteFailEmptyToken() throws JsonProcessingException {
+        requestResponseLog.write("\\n========== Mark favorite article without token===========\\n");
         Response response = with().headers("Content-Type", "application/json")
                 .when()
                 .request("POST", "articles/" + slug + "/favorite");
@@ -101,6 +114,7 @@ public class TestMarkFavoriteArticle {
             Send post to endpoint api/articles/{slug}/favourite
             Expect code and msg""")
     public void TC3_MarkFarvouriteFailInvalidToken() {
+        requestResponseLog.write("\\n========== Mark favorite article with invalid token===========\\n");
         Response response = with().headers("Content-Type", "application/json", "Authorization" ,"Authorization"+ token)
                 .when()
                 .request("POST", "/articles/" + slug + "/favorite");
@@ -115,8 +129,8 @@ public class TestMarkFavoriteArticle {
             Send post to endpoint api/articles/{slug}/favourite
             Expect code and msg""")
     public void TC4_MarkFarvouriteFailExpiredToken() {
-        String expiredToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6Im1hcmlnb2xkMDkiLCJleHAiOjE3NDY5NzMzNjYsInN1YiI6ImFjY2VzcyJ9.w3-XXsq1yZX6ItP3aBOFBjiYWPeTQ72pADYH504hV-Y";
-        Response response = with().headers("Content-Type", "application/json", "Authorization", "Token " + expiredToken)
+        requestResponseLog.write("\\n========== Mark favorite article with expired token===========\\n");
+        Response response = with().headers("Content-Type", "application/json", "Authorization", "Token " + expired_token)
                 .when()
                 .request("POST", "/articles/" + slug + "/favorite");
         Assertions.assertThat(response.statusCode()).as("Expected code: 403").isEqualTo(403);
@@ -130,6 +144,7 @@ public class TestMarkFavoriteArticle {
             Send post to endpoint api/articles/{slug}/favourite
             Expect code and msg""")
     public void TC5_MarkFarvouriteFailWrongFormatToken() {
+        requestResponseLog.write("\\n========== Mark favorite article with wrong format token ===========\\n");
         Response response = with().headers("Content-Type", "application/json", "Authorization" ,token)
                 .when()
                 .request("POST", "/articles/" + slug + "/favorite");
@@ -144,6 +159,7 @@ public class TestMarkFavoriteArticle {
             Send post to endpoint api/articles/{slug}/favourite
             Expect code and msg""")
     public void TC6_MarkFarvouriteFailEmptySlug() {
+        requestResponseLog.write("\\n========== Mark favorite article without slug===========\\n");
         Response response = with().headers("Content-Type", "application/json", "Authorization", "Token " + token)
                 .when()
                 .request("POST", "/articles/favorite");
@@ -158,6 +174,7 @@ public class TestMarkFavoriteArticle {
             Send post to endpoint api/articles/{slug}/favourite
             Expect code and msg""")
     public void TC7_MarkFarvouriteFailNonExistingSlug() {
+        requestResponseLog.write("\\n========== Mark favorite article with invalid slug===========\\n");
         String nonExistingslug = slug + System.currentTimeMillis();
         Response response = with().headers("Content-Type", "application/json", "Authorization", "Token " + token)
                 .when()
@@ -173,6 +190,7 @@ public class TestMarkFavoriteArticle {
             Send post to endpoint api/articles/{slug}/favourite
             Expect code and msg""")
     public void TC8_MarkFarvouriteFailMarkedSlug() {
+        requestResponseLog.write("\\n========== Mark favorite article for favorited article===========\\n");
         with().headers("Content-Type", "application/json", "Authorization", "Token " + token)
                 .when().request("POST", "articles/" + slug + "/favorite");
         Response response = with().headers("Content-Type", "application/json", "Authorization", "Token " + token)

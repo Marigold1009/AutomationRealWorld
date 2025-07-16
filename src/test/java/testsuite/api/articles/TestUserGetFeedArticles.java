@@ -11,19 +11,27 @@ import org.assertj.core.api.Assertions;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+import testsuite.config.ApiDataFactory;
 import testsuite.model.article.*;
 import testsuite.model.user.MUser;
 import testsuite.model.user.MUserDetail;
+import testsuite.utils.ApiLogFactory;
 
+import java.io.PrintStream;
+import java.io.StringWriter;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 
 import static io.restassured.RestAssured.with;
+import static testsuite.config.ApiDataFactory.USER_001;
+import static testsuite.config.ApiDataFactory.expired_token;
 
 public class TestUserGetFeedArticles {
     private final ObjectMapper mapper = new ObjectMapper();
+    private StringWriter requestResponseLog;
+    private PrintStream requestResponseCaptureStream;
     String token = "";
     List<String> authors = new ArrayList<>();
     List<MAuthor> authorObject = new ArrayList<>();
@@ -33,13 +41,15 @@ public class TestUserGetFeedArticles {
     @BeforeClass
     public void beforeClass() throws JsonProcessingException {
 //        list base url
-        RestAssured.baseURI = "https://realworld-api.ap.ngrok.io/api";
-        RestAssured.filters(new RequestLoggingFilter(), new ResponseLoggingFilter());
+        RestAssured.baseURI = ApiDataFactory.API_URL;
+        requestResponseLog = ApiLogFactory.getWriter();
+        requestResponseCaptureStream = ApiLogFactory.getStream();
+        RestAssured.requestSpecification =
+        RestAssured.given().filters(new RequestLoggingFilter(requestResponseCaptureStream)
+                , new ResponseLoggingFilter(requestResponseCaptureStream));
 
 //        Login and store toke
-        MUserDetail userDetail = new MUserDetail();
-        userDetail.setEmail("nguyenthucuc996@gmail.com");
-        userDetail.setPassword("Cucvantho09");
+        MUserDetail userDetail = ApiDataFactory.getUserByEmail(USER_001);
         MUser user = new MUser();
         user.setUser(userDetail);
         JsonNode node = mapper.valueToTree(user);
@@ -79,6 +89,7 @@ public class TestUserGetFeedArticles {
             Expect total articles equals or less than 20, start at latest article""", priority = 0)
     public void TC1_GetFeedsWithoutParam() throws JsonProcessingException {
 //        Send request
+        requestResponseLog.write("\\n========== Get feeds without params ===========\\n");
         Response response = with().headers("Content-Type", "application/json", "Authorization", "Token " + token)
                 .when()
                 .request("GET", "articles/feed");
@@ -121,6 +132,7 @@ public class TestUserGetFeedArticles {
         }
 
 //        Send request
+        requestResponseLog.write("\\n========== Get feeds with valid params ===========\\n");
         Response response = with().headers("Content-Type", "application/json", "Authorization", "Token " + token)
                 .queryParam("limit", limit)
                 .queryParam("offset", offset)
@@ -147,6 +159,7 @@ public class TestUserGetFeedArticles {
         if (total > 2) {
             limit = total - 1;
         }
+        requestResponseLog.write("\\n========== Get feeds with valid limit params ===========\\n");
         Response response = with().headers("Content-Type", "application/json", "Authorization", "Token " + token)
                 .queryParam("limit", limit)
                 .when()
@@ -165,10 +178,10 @@ public class TestUserGetFeedArticles {
     @Test(description = """
             Testcase: Input expired token
             Send get to endpoint: api/articles/feeds
-            Expect: Show msg""",priority = 2)
+            Expect: Show msg""")
     public void TC11_GetFeedsWithExpiredToken() {
-        token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6Im1hcmlnb2xkMDkiLCJleHAiOjE3NDY5NzMzNjYsInN1YiI6ImFjY2VzcyJ9.w3-XXsq1yZX6ItP3aBOFBjiYWPeTQ72pADYH504hV-Y";
-        Response response = with().headers("Content-Type", "application/json", "Authorization ", "Token " + token)
+        requestResponseLog.write("\\n========== Get feeds with expired token ===========\\n");
+        Response response = with().headers("Content-Type", "application/json", "Authorization ", "Token " + expired_token)
                 .when()
                 .request("GET", "articles/feed");
         Assertions.assertThat(response.statusCode()).as("Expected: 400").isEqualTo(400);
@@ -187,6 +200,7 @@ public class TestUserGetFeedArticles {
             offset = 2;
         }
 //        Send request
+        requestResponseLog.write("\\n========== Get feeds with valid offset params ===========\\n");
         Response response = with().headers("Content-Type", "application/json", "Authorization", "Token " + token)
                 .queryParam("offset", offset)
                 .when()
@@ -209,6 +223,7 @@ public class TestUserGetFeedArticles {
 //        Send request
         String limit = "limit";
         String offset = "offset";
+        requestResponseLog.write("\\n========== Get feeds with invalid params ===========\\n");
         Response response = with().headers("Content-Type", "application/json", "Authorization", "Token " + token)
                 .queryParam("limit", limit)
                 .queryParam("offset", offset)
@@ -234,6 +249,7 @@ public class TestUserGetFeedArticles {
 //        Send request and get response
         int limit = 0;
         int offset = 0;
+        requestResponseLog.write("\\n========== Get feeds with invalid limit, valid offset params ===========\\n");
         Response response = with().headers("Content-Type", "application/json", "Authorization", "Token " + token)
                 .queryParam("limit", limit)
                 .queryParam("offset", offset)
@@ -256,6 +272,7 @@ public class TestUserGetFeedArticles {
     public void TC7_GetFeedWithValidLimitInvalidOffset() throws JsonProcessingException {
 //      Send request
         int offset = total;
+        requestResponseLog.write("\\n========== Get feeds with valid limit, invalid offset params ===========\\n");
         Response response = with().headers("Content-Type", "application/json", "Authorization", "Token " + token)
                 .queryParam("offset", offset)
                 .when()
@@ -274,6 +291,7 @@ public class TestUserGetFeedArticles {
     public void TC8_GetFeedWithInvalidPLimit() throws JsonProcessingException {
 //        Send request
         int limit = -1;
+        requestResponseLog.write("\\n========== Get feeds with invalid limit params ===========\\n");
         Response response = with().headers("Content-Type", "application/json", "Authorization", "Token " + token)
                 .queryParam("limit", limit)
                 .when()
@@ -294,6 +312,7 @@ public class TestUserGetFeedArticles {
             Expect: Show msg""",priority = 1)
     public void TC9_GetFeedWithInvalidOffset() throws JsonProcessingException {
         String offset = "offset";
+        requestResponseLog.write("\\n========== Get feeds with offset param is  string ===========\\n");
         Response response = with().headers("Content-Type", "application/json", "Authorization", "Token " + token)
                 .queryParam("offset", offset)
                 .when()
@@ -312,6 +331,7 @@ public class TestUserGetFeedArticles {
             Send get to endpoint: api/articles/feeds
             Expect: Show msg""",priority = 1)
     public void TC10_GetFeedsWithoutAuthorize() {
+        requestResponseLog.write("\\n========== Get feeds without token ===========\\n");
         Response response = with().headers("Content-Type", "application/json")
                 .when()
                 .request("GET", "/articles/feed");
@@ -327,6 +347,7 @@ public class TestUserGetFeedArticles {
             Send get to endpoint: api/articles/feeds
             Expect: Show msg""",priority = 1)
     public void TC12_GetFeedsWithInvalidToken() {
+        requestResponseLog.write("\\n========== Get feeds with invalid token ===========\\n");
         Response response = with().headers("Content-Type", "application/json", "Authorization ", token)
                 .when()
                 .request("GET", "articles/feed");

@@ -6,7 +6,24 @@
     </listeners>
     <test name="Test Create Article" >
         <classes>
-            <class name="testsuite.api.articles.TestCreateArticle" >
+            <class name="testsuite.api.articles.TestCreateArticle"/>
+            <class name="testsuite.api.articles.TestDeleteArticle"/>
+            <class name="testsuite.api.articles.TestGetArticle"/>
+            <class name="testsuite.api.articles.TestGetArticleList"/>
+            <class name="testsuite.api.articles.TestMarkFavoriteArticle"/>
+            <class name="testsuite.api.articles.TestUpdateArticle"/>
+            <class name="testsuite.api.articles.TestUserGetFeedArticles"/>
+            <class name="testsuite.api.authentication.Testlogin"/>
+            <class name="testsuite.api.authentication.Testsignup"/>
+            <class name="testsuite.api.profiles.TestFollowUser"/>
+            <class name="testsuite.api.profiles.TestGetProfile"/>
+            <class name="testsuite.api.profiles.TestUnfollowUser"/>
+            <class name="testsuite.api.tags.TestAllTags"/>
+            <class name="testsuite.api.users.TestGetCurrentUser"/>
+            <class name="testsuite.api.comment.TestDeleteComment"/>
+            <class name="testsuite.api.comment.TestGetComment"/>
+            <class name="testsuite.api.comment.TestPostComment"/>
+            <class name="testsuite.api.fullflow.FullFlow">
             </class>
         </classes>
     </test>
