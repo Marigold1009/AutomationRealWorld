@@ -6,16 +6,17 @@ import io.restassured.RestAssured;
 import io.restassured.filter.log.RequestLoggingFilter;
 import io.restassured.filter.log.ResponseLoggingFilter;
 import io.restassured.response.Response;
+import model.article.MArticle;
+import model.article.MArticlesResponse;
+import model.article.MAuthor;
+import model.tag.MTags;
+
 import org.assertj.core.api.Assertions;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import testsuite.config.ApiDataFactory;
-import testsuite.model.article.MArticle;
-import testsuite.model.article.MArticlesResponse;
-import testsuite.model.article.MAuthor;
-import testsuite.model.tag.MTags;
-import testsuite.utils.ApiLogFactory;
+import utils.logging.LogFactory;
 
 import java.io.PrintStream;
 import java.io.StringWriter;
@@ -37,8 +38,8 @@ public class TestGetArticleList {
     @BeforeClass
     public void BeforeClass() {
         RestAssured.baseURI = ApiDataFactory.API_URL;
-        requestResponseLog = ApiLogFactory.getWriter();
-        requestResponseCaptureStream = ApiLogFactory.getStream();
+        requestResponseLog = LogFactory.getWriter();
+        requestResponseCaptureStream = LogFactory.getStream();
         // Set a global request specification with logging filters
         RestAssured.requestSpecification =
                 RestAssured.given().filters(new RequestLoggingFilter(requestResponseCaptureStream)

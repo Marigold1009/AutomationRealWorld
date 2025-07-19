@@ -7,16 +7,17 @@ import io.restassured.RestAssured;
 import io.restassured.filter.log.RequestLoggingFilter;
 import io.restassured.filter.log.ResponseLoggingFilter;
 import io.restassured.response.Response;
+import model.article.MAuthor;
+import model.comments.MComment;
+import model.comments.MCommentDetail;
+import model.user.MUser;
+import model.user.MUserDetail;
+
 import org.assertj.core.api.Assertions;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import testsuite.config.ApiDataFactory;
-import testsuite.model.article.MAuthor;
-import testsuite.model.comments.MComment;
-import testsuite.model.comments.MCommentDetail;
-import testsuite.model.user.MUser;
-import testsuite.model.user.MUserDetail;
-import testsuite.utils.ApiLogFactory;
+import utils.logging.LogFactory;
 
 import java.io.PrintStream;
 import java.io.StringWriter;
@@ -35,9 +36,9 @@ public class TestPostComment {
     @BeforeClass
     public void BeforeClass() throws JsonProcessingException {
         RestAssured.baseURI = ApiDataFactory.API_URL;
-        ApiLogFactory.init();
-        requestResponseLog = ApiLogFactory.getWriter();
-        requestResponseCaptureStream = ApiLogFactory.getStream();
+        LogFactory.init();
+        requestResponseLog = LogFactory.getWriter();
+        requestResponseCaptureStream = LogFactory.getStream();
         RestAssured.requestSpecification =
         RestAssured.given().filters(new RequestLoggingFilter(requestResponseCaptureStream)
                 , new ResponseLoggingFilter(requestResponseCaptureStream));

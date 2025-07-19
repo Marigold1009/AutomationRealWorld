@@ -7,25 +7,23 @@ import io.restassured.RestAssured;
 import io.restassured.filter.log.RequestLoggingFilter;
 import io.restassured.filter.log.ResponseLoggingFilter;
 import io.restassured.response.Response;
+import model.article.MArticle;
+import model.article.MArticleCreate;
+import model.article.MArticleResponse;
+import model.user.MUser;
+import model.user.MUserDetail;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.assertj.core.api.Assertions;
-import org.testng.Reporter;
 import org.testng.annotations.*;
 import testsuite.config.ApiDataFactory;
-import testsuite.model.article.MArticle;
-import testsuite.model.article.MArticleCreate;
-import testsuite.model.article.MArticleResponse;
-import testsuite.model.user.MUser;
-import testsuite.model.user.MUserDetail;
-import testsuite.utils.ApiLogFactory;
-import testsuite.utils.WriterOutputStream;
+import utils.logging.LogFactory;
 
 import java.io.PrintStream;
 import java.io.StringWriter;
 import java.util.List;
 
-import static io.restassured.RestAssured.with;
 import static testsuite.config.ApiDataFactory.USER_001;
 
 public class TestCreateArticle {
@@ -34,13 +32,13 @@ public class TestCreateArticle {
     private String token;
     private String title = "test Create Auto002";
     private StringWriter requestResponseLog;
-    private PrintStream requestResponseCaptureStream = ApiLogFactory.getStream();
+    private PrintStream requestResponseCaptureStream = LogFactory.getStream();
 
     @BeforeClass
     public void beforeClass() throws JsonProcessingException {
-        ApiLogFactory.init();
-        requestResponseLog = ApiLogFactory.getWriter();
-        requestResponseCaptureStream = ApiLogFactory.getStream();
+        LogFactory.init();
+        requestResponseLog = LogFactory.getWriter();
+        requestResponseCaptureStream = LogFactory.getStream();
         RestAssured.baseURI = ApiDataFactory.API_URL;
 
         // Set a global request specification with logging filters

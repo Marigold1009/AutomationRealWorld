@@ -8,17 +8,18 @@ import io.restassured.RestAssured;
 import io.restassured.filter.log.RequestLoggingFilter;
 import io.restassured.filter.log.ResponseLoggingFilter;
 import io.restassured.response.Response;
+import model.user.MUser;
+import model.user.MUserDetail;
+import model.user.MUserLoginError;
+import model.user.MUserLoginErrorDetail;
+
 import org.assertj.core.api.Assertions;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 import testsuite.config.ApiDataFactory;
-import testsuite.model.user.MUser;
-import testsuite.model.user.MUserDetail;
-import testsuite.model.user.MUserLoginError;
-import testsuite.model.user.MUserLoginErrorDetail;
-import testsuite.utils.ApiLogFactory;
+import utils.logging.LogFactory;
 
 import java.io.PrintStream;
 import java.io.StringWriter;
@@ -34,8 +35,8 @@ public class Testlogin {
     @BeforeClass
     public void BeforeClass() {
         RestAssured.baseURI = ApiDataFactory.API_URL;
-        requestResponseLog = ApiLogFactory.getWriter();
-        requestResponseCaptureStream = ApiLogFactory.getStream();
+        requestResponseLog = LogFactory.getWriter();
+        requestResponseCaptureStream = LogFactory.getStream();
         RestAssured.requestSpecification =
         RestAssured.given().filters(new RequestLoggingFilter(requestResponseCaptureStream)
                 , new ResponseLoggingFilter(requestResponseCaptureStream));

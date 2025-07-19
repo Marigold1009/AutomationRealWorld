@@ -1,9 +1,9 @@
 package testsuite.config;
 
-import testsuite.model.user.MUserDetail;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import model.user.MUserDetail;
 
 public class ApiDataFactory {
     public static final String API_URL = "https://realworld-api.ap.ngrok.io/api";

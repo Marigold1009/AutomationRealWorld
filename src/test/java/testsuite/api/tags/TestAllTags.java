@@ -7,16 +7,18 @@ import io.restassured.RestAssured;
 import io.restassured.filter.log.RequestLoggingFilter;
 import io.restassured.filter.log.ResponseLoggingFilter;
 import io.restassured.response.Response;
+import model.article.MArticle;
+import model.article.MArticlesResponse;
+import model.tag.MTags;
+import model.user.MUser;
+import model.user.MUserDetail;
+
 import org.assertj.core.api.Assertions;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import testsuite.model.article.MArticle;
-import testsuite.model.article.MArticlesResponse;
-import testsuite.model.tag.MTags;
-import testsuite.model.user.MUser;
-import testsuite.model.user.MUserDetail;
-import testsuite.utils.ApiLogFactory;
+
+import utils.logging.LogFactory;
 
 import java.io.PrintStream;
 import java.io.StringWriter;
@@ -35,8 +37,8 @@ public class TestAllTags {
     @BeforeClass
     public void BeforeClass() throws JsonProcessingException {
         RestAssured.baseURI = "https://realworld-api.ap.ngrok.io/api";
-        requestResponseLog = ApiLogFactory.getWriter();
-        requestResponseCaaptureStream = ApiLogFactory.getStream();
+        requestResponseLog = LogFactory.getWriter();
+        requestResponseCaaptureStream = LogFactory.getStream();
         RestAssured.requestSpecification =
                 RestAssured.given().filters(new RequestLoggingFilter(requestResponseCaaptureStream)
                         , new ResponseLoggingFilter(requestResponseCaaptureStream));

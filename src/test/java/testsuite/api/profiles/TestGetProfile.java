@@ -7,19 +7,19 @@ import io.restassured.RestAssured;
 import io.restassured.filter.log.RequestLoggingFilter;
 import io.restassured.filter.log.ResponseLoggingFilter;
 import io.restassured.response.Response;
+import model.article.MArticle;
+import model.article.MArticlesResponse;
+import model.article.MAuthor;
+import model.profiles.MProfile;
+import model.profiles.MProfilesDetail;
+import model.user.MUser;
+import model.user.MUserDetail;
+
 import org.assertj.core.api.Assertions;
-import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import testsuite.config.ApiDataFactory;
-import testsuite.model.article.MArticle;
-import testsuite.model.article.MArticlesResponse;
-import testsuite.model.article.MAuthor;
-import testsuite.model.profiles.MProfile;
-import testsuite.model.profiles.MProfilesDetail;
-import testsuite.model.user.MUser;
-import testsuite.model.user.MUserDetail;
-import testsuite.utils.ApiLogFactory;
+import utils.logging.LogFactory;
 
 import java.io.PrintStream;
 import java.io.StringWriter;
@@ -40,8 +40,8 @@ public class TestGetProfile {
     @BeforeClass
     public void BeforeClass() throws JsonProcessingException {
         RestAssured.baseURI = ApiDataFactory.API_URL;
-        requestResponseLog = ApiLogFactory.getWriter();
-        requestResponseCaaptureStream = ApiLogFactory.getStream();
+        requestResponseLog = LogFactory.getWriter();
+        requestResponseCaaptureStream = LogFactory.getStream();
         RestAssured.requestSpecification =
         RestAssured.given().filters(new RequestLoggingFilter(requestResponseCaaptureStream)
                 , new ResponseLoggingFilter(requestResponseCaaptureStream));

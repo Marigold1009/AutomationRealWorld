@@ -2,7 +2,7 @@
 
 <suite name="Suite1" verbose="1" >
     <listeners>
-        <listener class-name="testsuite.utils.ApiLogListener"/>
+        <listener class-name="utils.report.ApiReportListener"/>
     </listeners>
     <test name="Test Create Article" >
         <classes>
