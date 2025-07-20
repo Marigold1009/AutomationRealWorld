@@ -1,5 +1,6 @@
 package selenium.pageobject;
 
+import org.assertj.core.api.Assertions;
 import org.openqa.selenium.By;
 import selenium.core.BasePage;
 import selenium.core.WebLocator;
@@ -14,7 +15,7 @@ public class HomePage extends BasePage {
         return this;
     }
 
-    public HomePage click_on_button_sign_in() {
+    public HomePage click_on_button_sign_in() throws InterruptedException {
         Page.BUTTON_SIGN_IN.waitUntilClickable().click();
         return this;
     }
@@ -35,9 +36,10 @@ public class HomePage extends BasePage {
         return this;
     }
 
-    public HomePage verify_article_favorite_count(String title, int count) {
-        Page.sectionArticle(title).findElement(Page.articleFavoriteCount()).waitUntilVisible()
-                .waitUntilElementText(String.valueOf(count));
+    public HomePage verify_article_favorite_count(String title, String count) {
+        String value = Page.sectionArticle(title).findElement(Page.articleFavoriteCount()).waitUntilVisible().getText();
+        value = value.trim();
+        Assertions.assertThat(value).as("Expect favorite count is: " + count).isEqualTo(count);
         return this;
     }
 
@@ -64,7 +66,7 @@ public class HomePage extends BasePage {
         }
 
         public static WebLocator articleFavoriteCount() {
-            return new WebLocator(By.xpath("//button[./i[@class='ion-heart']]"));
+            return new WebLocator(By.xpath(".//button[./i[@class='ion-heart']]"));
         }
 
         public static WebLocator articleTag(String tag) {
