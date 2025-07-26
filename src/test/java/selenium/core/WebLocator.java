@@ -19,14 +19,16 @@ import testhelper.TestParams;
 
 public class WebLocator {
 
-    private final WebDriver driver = DriverManager.getDriver();
+    private final WebDriver driver;
     private final By locator;
-    private final WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(60));
+    private final WebDriverWait wait;
     private WebLocator parent = null;
 
     private List<WebLocator> parents = new ArrayList<>();
 
     public WebLocator(By locator) {
+        driver = DriverManager.getDriver();
+        wait = new WebDriverWait(driver, Duration.ofSeconds(60));
         this.locator = locator;
     }
 
