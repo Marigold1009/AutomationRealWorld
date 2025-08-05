@@ -7,6 +7,10 @@ import org.testng.annotations.*;
 import java.util.Arrays;
 
 public class LoginTestSuite {
+  @BeforeClass
+  public void BeforeClass(){
+
+  }
 
   @BeforeGroups(groups = {"valid_user"})
   public void beforeGroupValidUser() {

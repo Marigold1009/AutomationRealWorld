@@ -25,6 +25,7 @@ import java.io.PrintStream;
 import java.io.StringWriter;
 import java.util.List;
 
+import static constant.Constant.*;
 import static io.restassured.RestAssured.with;
 
 public class Testlogin {
@@ -44,22 +45,22 @@ public class Testlogin {
 
     @DataProvider(name = "valid_credentials")
     public Object[][] dpMethod_validCredentials() {
-        return new Object[][]{{"nguyenthucuc996@gmail.com", "Cucvantho09"}};
+        return new Object[][]{{EMAIL, PASSWORD}};
     }
 
     @DataProvider(name = "wrong_email")
-    public Object[][] dpMethod_wronfEmail() {
-        return new Object[][]{{"abc.com", "Cuvantho09"}};
+    public Object[][] dpMethod_wrongEmail() {
+        return new Object[][]{{INVALID_EMAIL, PASSWORD}};
     }
 
     @DataProvider(name = "wrong_password")
     public Object[][] dpMethod_WrongPassword() {
-        return new Object[][]{{"nguyenthucuc996@gmail.com", "abc"}};
+        return new Object[][]{{EMAIL, INVALID_PASSWORD}};
     }
 
     @DataProvider(name = "wrong_allFields")
     public Object[][] dpMethod_WrongAllFields() {
-        return new Object[][]{{"abc.com", "abc"}};
+        return new Object[][]{{INVALID_EMAIL, INVALID_PASSWORD}};
     }
 
     @Test(description = """

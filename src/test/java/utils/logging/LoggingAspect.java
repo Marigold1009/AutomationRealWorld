@@ -16,6 +16,7 @@ import java.time.LocalDateTime;
 public class LoggingAspect {
 
   private LocalDateTime beforeActionTime;
+//private static ThreadLocal<LocalDateTime> beforeActionTime = new ThreadLocal<>();
   private StringWriter logWriter = LogFactory.getWriter();
 
   @Before("execution(* selenium.core.BasePage+.*(..))")
@@ -47,17 +48,21 @@ public class LoggingAspect {
               + ")\n");
     }
     beforeActionTime = LocalDateTime.now();
+//    beforeActionTime.set(LocalDateTime.now());
+
   }
 
   @AfterThrowing(pointcut = "execution(* selenium.core.BasePage+.*(..))", throwing = "error")
   public void afterFailureAction(JoinPoint joinPoint, Throwable error) throws IOException {
     String actionDuration = elapseDuration(beforeActionTime);
+//    String actionDuration = elapseDuration(beforeActionTime.get());
     logWriter.write("Action failed: " + error + ". (" + actionDuration + " sec).\n");
   }
 
   @AfterReturning(pointcut = "execution(* selenium.core.BasePage+.*(..))", returning = "result")
   public void afterAction(JoinPoint joinPoint, Object result) throws IOException {
     String actionDuration = elapseDuration(beforeActionTime);
+//    String actionDuration = elapseDuration(beforeActionTime.get());
     logWriter.write("Action Done! (" + actionDuration + " sec).\n");
   }
 

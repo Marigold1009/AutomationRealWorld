@@ -6,7 +6,10 @@
     </listeners>
     <test name="Test Create Article" >
         <classes>
-            <class name="testsuite.ui.home.TestHomePage"/>
+<!--            <class name="testsuite.ui.home.TestHomePage"/>-->
+<!--            <class name="testsuite.ui.home.TestHomePageUser"/>-->
+<!--            <class name="testsuite.ui.signin.TestLoginPage"/>-->
+            <class name="testsuite.ui.signup.TestSignUpPage"/>
         </classes>
     </test>
 </suite>
