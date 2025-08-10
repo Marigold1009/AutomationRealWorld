@@ -2,6 +2,8 @@ package selenium.pageobject;
 
 import org.assertj.core.api.Assertions;
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.WebElement;
 import selenium.core.BasePage;
 import selenium.core.DriverManager;
 import selenium.core.WebLocator;
@@ -21,7 +23,7 @@ public class SignUpPage extends BasePage {
     }
 
     public SignUpPage enter_username(String username){
-        page.TEXT_FIELD_EMAIL.waitUntilVisible().sendKeys(username);
+        page.TEXT_FIELD_USERNAME.waitUntilVisible().sendKeys(username);
         return this;
     }
 
@@ -49,6 +51,15 @@ public class SignUpPage extends BasePage {
     public SignUpPage click_have_an_account_button(){
         page.HAVE_AN_ACCOUNT_BUTTON.waitUntilClickable().click();
         Assertions.assertThat(DriverManager.getDriver().getCurrentUrl()).isEqualTo(URL_SIGNIN);
+        return this;
+    }
+
+    public SignUpPage verify_error_message(String expected_msg){
+        WebElement element = DriverManager.getDriver().findElement(By.xpath("//input[@type='email']"));
+        String actual_msg = (String) ((JavascriptExecutor) DriverManager.getDriver())
+                .executeScript("return arguments[0].validationMessage;", element);
+        System.out.println(actual_msg);
+        Assertions.assertThat(actual_msg).isEqualTo(expected_msg);
         return this;
     }
 

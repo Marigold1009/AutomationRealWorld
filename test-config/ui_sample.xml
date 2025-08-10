@@ -9,7 +9,14 @@
 <!--            <class name="testsuite.ui.home.TestHomePage"/>-->
 <!--            <class name="testsuite.ui.home.TestHomePageUser"/>-->
 <!--            <class name="testsuite.ui.signin.TestLoginPage"/>-->
-            <class name="testsuite.ui.signup.TestSignUpPage"/>
+<!--            <class name="testsuite.ui.signup.TestSignUpPage"/>-->
+<!--            <class name="testsuite.ui.authorpage.AuthorPageTestSuite"/>-->
+<!--            <class name="testsuite.ui.articles.CreateArticleTestSuite"/>-->
+<!--            <class name="testsuite.ui.articles.DetailedArticlesGuestModeTestSuite"/>-->
+<!--            <class name="testsuite.ui.articles.DetailedArticleLoginModeTestSuite"/>-->
+<!--            <class name="testsuite.ui.articles.UpdateArticlesTestSuite"/>-->
+<!--            <class name="testsuite.ui.profiles.MyAccPageTestSuite"/>-->
+            <class name="testsuite.ui.profiles.SettingPageTestSuite"/>
         </classes>
     </test>
 </suite>

@@ -61,13 +61,38 @@ public class TestSignUpPage {
         signUpPage.verify_error_msg("user with this email already exists");
     }
 
-    @Test(description = "Sign up with existing email")
-    public void TC3_signup_with_invalid_email(){
+    @Test(description = "Sign up with invalid email")
+    public void TC4_signup_with_invalid_email(){
         signUpPage.enter_username(BASE_USER_NAME);
+        signUpPage.enter_email(INVALID_EMAIL);
+        signUpPage.enter_password(PASSWORD);
+        signUpPage.click_signup_button();
+        signUpPage.verify_error_message(TOOL_TIP_PART01+"'"+INVALID_EMAIL+"'"+TOOL_TIP_PART02);
+    }
+
+    @Test(description = "Sign up without userName")
+    public void TC5_Sigup_without_userName(){
         signUpPage.enter_email(EMAIL);
         signUpPage.enter_password(PASSWORD);
         signUpPage.click_signup_button();
-//        Verify the tootip
     }
 
+    @Test(description = "Sign up without email")
+    public void TC6_Sigup_without_email(){
+        signUpPage.enter_username(BASE_USER_NAME);
+        signUpPage.enter_password(PASSWORD);
+        signUpPage.click_signup_button();
+    }
+
+    @Test(description = "Sign up without password")
+    public void TC7_Sigup_without_password(){
+        signUpPage.enter_username(BASE_USER_NAME);
+        signUpPage.enter_email(EMAIL);
+        signUpPage.click_signup_button();
+    }
+
+    @Test(description = "Sign up without all field")
+    public void TC8_Sigup_without_all_fields(){
+        signUpPage.click_signup_button();
+    }
 }

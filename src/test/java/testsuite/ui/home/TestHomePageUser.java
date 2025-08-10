@@ -264,7 +264,7 @@ public class TestHomePageUser {
         homePage.verify_marked_favorited_button(article.getTitle());
     }
 
-    @Test(description = "Verify favoried article")
+    @Test(description = "Verify un favoried article")
     public void TC14_Verify_unmark_favorited_article() {
         homePage.click_on_feed_tab("Global Feed");
 //        Call API to unmark article
